@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'pages/welcome_page.dart';
 import 'pages/login_page.dart';
 
 void main() {
@@ -22,7 +22,7 @@ class MindSphereApp extends StatelessWidget {
         ),
         fontFamily: 'Roboto',
       ),
-      home: const LoginPage(),
+      home: const WelcomePage(),
     );
   }
 }
