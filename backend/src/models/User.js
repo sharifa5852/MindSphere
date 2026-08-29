@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    photoURL: {
+      type: String,
+      default: "",
+    },
     preferences: {
       notificationsEnabled: {
         type: Boolean,

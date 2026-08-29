@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
-import 'pages/welcome_page.dart';
-import 'pages/login_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+import 'firebase_options.dart';
+import 'pages/auth_gate.dart';
+
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+    print('Firebase initialized successfully');
+
   runApp(const MindSphereApp());
 }
 
@@ -22,7 +32,7 @@ class MindSphereApp extends StatelessWidget {
         ),
         fontFamily: 'Roboto',
       ),
-      home: const WelcomePage(),
+     home: const AuthGate(),
     );
   }
 }

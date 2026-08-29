@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -130,9 +131,11 @@ class ProfilePage extends StatelessWidget {
           // LOGOUT
           Center(
             child: TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () async {
+  await AuthService().logout();
+  if (!context.mounted) return;
+  Navigator.of(context).popUntil((route) => route.isFirst);
+},
               child: const Text(
                 'Log out',
                 style: TextStyle(

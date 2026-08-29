@@ -1,10 +1,112 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../app_shell.dart';
-import 'home_page.dart';
+import '../services/auth_service.dart';
+import '../services/api_service.dart';
+import '../utils/auth_error_handler.dart';
 import 'signup_page.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final AuthService _authService = AuthService();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool hidePassword = true;
+  bool isSubmitting = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  void showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> login() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
+      showMessage('Please enter your email and password.');
+      return;
+    }
+
+    if (isSubmitting) return;
+    setState(() => isSubmitting = true);
+
+    try {
+      // -----------------------------
+      // 1. Sign in with Firebase
+      // -----------------------------
+
+      final userCredential = await _authService.login(
+        email: email,
+        password: password,
+      );
+
+      final user = userCredential.user;
+
+      if (user == null) {
+        showMessage('Login failed. Please try again.');
+        return;
+      }
+
+      debugPrint('Firebase login successful');
+      debugPrint('Firebase UID: ${user.uid}');
+
+      // -----------------------------
+      // 2. Synchronize with Express + MongoDB backend
+      // -----------------------------
+
+      if (!mounted) return;
+
+      await ApiService.syncUser(
+        name: user.displayName ?? 'MindSphere User',
+      );
+
+      debugPrint('User synchronized with backend.');
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AppShell(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      showMessage(getAuthErrorMessage(e.code));
+
+      debugPrint('Firebase Auth Error Code: ${e.code}');
+      debugPrint('Firebase Auth Error Message: ${e.message}');
+    } catch (e) {
+      if (!mounted) return;
+
+      debugPrint('Login/backend error: $e');
+
+      showMessage(
+        'Login succeeded, but we could not connect to the server.',
+      );
+    } finally {
+      if (mounted) setState(() => isSubmitting = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +114,7 @@ class LoginPage extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
             children: [
               const SizedBox(height: 30),
 
@@ -67,11 +168,13 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 40),
 
               // Email
               TextField(
+                controller: emailController,
                 keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
                   labelText: 'Email',
                   hintText: 'you@example.com',
@@ -88,7 +191,10 @@ class LoginPage extends StatelessWidget {
 
               // Password
               TextField(
-                obscureText: true,
+                controller: passwordController,
+                obscureText: hidePassword,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => login(),
                 decoration: InputDecoration(
                   labelText: 'Password',
                   hintText: '••••••••',
@@ -97,6 +203,18 @@ class LoginPage extends StatelessWidget {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        hidePassword = !hidePassword;
+                      });
+                    },
+                    icon: Icon(
+                      hidePassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                    ),
                   ),
                 ),
               ),
@@ -115,20 +233,23 @@ class LoginPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AppShell(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'Log in',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  onPressed: isSubmitting ? null : login,
+                  child: isSubmitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Log in',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
 

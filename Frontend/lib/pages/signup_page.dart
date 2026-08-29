@@ -1,5 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import '../app_shell.dart';
+import '../services/auth_service.dart';
+import '../services/api_service.dart';
+import '../utils/auth_error_handler.dart';
 
 const cream = Color(0xFFFAF8F3);
 const paper = Color(0xFFFFFDFA);
@@ -17,6 +23,7 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  final AuthService _authService = AuthService();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -25,6 +32,7 @@ class _SignupPageState extends State<SignupPage> {
   bool hidePassword = true;
   bool hideConfirmPassword = true;
   bool agreeToPrivacy = false;
+  bool isSubmitting = false;
 
   @override
   void dispose() {
@@ -35,11 +43,15 @@ class _SignupPageState extends State<SignupPage> {
     super.dispose();
   }
 
-  void createAccount() {
+  Future<void> createAccount() async {
     final name = nameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
     final confirmPassword = confirmPasswordController.text;
+
+    // -----------------------------
+    // 1. Basic validation
+    // -----------------------------
 
     if (name.isEmpty ||
         email.isEmpty ||
@@ -69,11 +81,59 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
-    // Frontend prototype only.
-    // Your teammate can connect the signup API here later.
-    showMessage('Account created successfully ✓');
+    if (isSubmitting) return;
+    setState(() => isSubmitting = true);
 
-    Future.delayed(const Duration(milliseconds: 700), () {
+    showMessage('Creating your account...');
+
+    try {
+      // -----------------------------
+      // 2. Create Firebase account
+      // -----------------------------
+
+      final userCredential = await _authService.signUp(
+        email: email,
+        password: password,
+      );
+
+      final user = userCredential.user;
+
+      if (user == null) {
+        showMessage('Account creation failed.');
+        return;
+      }
+
+      debugPrint('Firebase signup successful');
+      debugPrint('Firebase UID: ${user.uid}');
+      debugPrint('Firebase email: ${user.email}');
+
+      // -----------------------------
+      // 3. Save the user's name on the Firebase profile
+      // -----------------------------
+
+      await user.updateDisplayName(name);
+
+      // -----------------------------
+      // 4. Synchronize with Express + MongoDB backend
+      // -----------------------------
+
+      if (!mounted) return;
+      showMessage('Saving your profile...');
+
+      await ApiService.syncUser(name: name);
+
+      debugPrint('User synchronized with backend.');
+
+      if (!mounted) return;
+
+      showMessage('Account created successfully ✓');
+
+      // -----------------------------
+      // 5. Go to the main app
+      // -----------------------------
+
+      await Future.delayed(const Duration(milliseconds: 700));
+
       if (!mounted) return;
 
       Navigator.pushReplacement(
@@ -82,7 +142,27 @@ class _SignupPageState extends State<SignupPage> {
           builder: (_) => const AppShell(),
         ),
       );
-    });
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      showMessage(getAuthErrorMessage(e.code));
+
+      debugPrint('Firebase Auth Error Code: ${e.code}');
+      debugPrint('Firebase Auth Error Message: ${e.message}');
+    } catch (e) {
+      if (!mounted) return;
+
+      debugPrint('Signup/backend error: $e');
+
+      // Firebase account may already exist even though the backend
+      // sync failed — the next login attempt will retry the sync.
+      showMessage(
+        'Account created, but your profile could not be saved. '
+        'Please try logging in again.',
+      );
+    } finally {
+      if (mounted) setState(() => isSubmitting = false);
+    }
   }
 
   void showMessage(String message) {
@@ -365,7 +445,7 @@ class _SignupPageState extends State<SignupPage> {
               width: double.infinity,
               height: 52,
               child: FilledButton(
-                onPressed: createAccount,
+                onPressed: isSubmitting ? null : createAccount,
                 style: FilledButton.styleFrom(
                   backgroundColor: forest,
                   foregroundColor: Colors.white,
@@ -373,13 +453,23 @@ class _SignupPageState extends State<SignupPage> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
-                child: const Text(
-                  'Create account',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
-                ),
+                child: isSubmitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.4,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'Create account',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
               ),
             ),
 

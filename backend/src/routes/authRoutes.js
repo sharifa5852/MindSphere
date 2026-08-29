@@ -1,11 +1,13 @@
 const express = require("express");
+const router = express.Router();
+const authenticateUser = require("../middleware/authMiddleware");
 const {
   syncUser,
   getCurrentUser,
 } = require("../controllers/authController");
-const authenticateUser = require("../middleware/authMiddleware");
 
-const router = express.Router();
+
+
 
 router.post("/sync", authenticateUser, syncUser);
 router.get("/me", authenticateUser, getCurrentUser);
