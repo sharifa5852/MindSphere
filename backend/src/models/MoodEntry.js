@@ -14,13 +14,27 @@ const moodEntrySchema = new mongoose.Schema(
     },
     stress: {
       type: Number,
+      required: true,
       min: 1,
       max: 5,
     },
+    energy: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 100,
+    },
     sleep: {
       type: Number,
+      required: true,
       min: 0,
       max: 24,
+    },
+    socialConnection: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 4,
     },
     note: {
       type: String,

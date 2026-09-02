@@ -51,14 +51,23 @@ const therapistSchema = new mongoose.Schema(
       trim: true,
       maxlength: 1500,
     },
+    
     profileImageUrl: {
       type: String,
       trim: true,
       default: null,
     },
+     verified: {
+      type: Boolean,
+      default: false, // Only flip to true once a real person has confirmed these details.
+    },
     isActive: {
       type: Boolean,
       default: true,
+    },
+        seedSource: {
+      type: String,
+      default: null,
     },
   },
   {

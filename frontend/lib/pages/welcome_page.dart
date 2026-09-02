@@ -90,8 +90,8 @@ class WelcomePage extends StatelessWidget {
                   color: lavender,
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: Column(
-                  children: const [
+                child: const Column(
+                  children: [
                     Text(
                       '✦  What MindSphere offers',
                       style: TextStyle(

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -100,9 +99,7 @@ class _LoginPageState extends State<LoginPage> {
 
       debugPrint('Login/backend error: $e');
 
-      showMessage(
-        'Login succeeded, but we could not connect to the server.',
-      );
+      showMessage(ApiService.readableError(e));
     } finally {
       if (mounted) setState(() => isSubmitting = false);
     }

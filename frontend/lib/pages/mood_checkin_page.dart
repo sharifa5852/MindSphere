@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'mood_result_page.dart';
+import '../services/api_service.dart';
+
 class MoodCheckInPage extends StatefulWidget {
   const MoodCheckInPage({super.key});
 
@@ -11,6 +14,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
   // Selected answers
   int selectedMood = -1;
   int selectedSocial = -1;
+  bool _isSaving = false;
 
   // Slider values
   double intensity = 50;
@@ -43,23 +47,55 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
     super.dispose();
   }
 
-  // This will later be replaced/connected with your AI model API.
-  void analyzeMood() {
-    if (selectedMood == -1) {
+  Future<void> analyzeMood() async {
+    if (selectedMood == -1 || selectedSocial == -1) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select your current mood first.'),
+          content: Text('Please select your mood and social connection.'),
         ),
       );
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const EmotionResultPage(),
-      ),
-    );
+    setState(() => _isSaving = true);
+
+    try {
+      await ApiService.createMoodEntry(
+        // The UI index is 0-4; the API accepts mood values 1-5.
+        mood: selectedMood + 1,
+        // Convert the 0-100 slider to the API's required 1-5 stress scale.
+        stress: ((intensity / 25).round() + 1).clamp(1, 5).toInt(),
+        energy: energy.round(),
+        sleep: sleep.round(),
+        // The UI index is 0-3; the API accepts social connection values 1-4.
+        socialConnection: selectedSocial + 1,
+        note: reflectionController.text,
+      );
+
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MoodResultPage(
+            result: MoodCheckInResult(
+              mood: selectedMood + 1,
+              stress: ((intensity / 25).round() + 1).clamp(1, 5).toInt(),
+              energy: energy.round(),
+              sleep: sleep.round(),
+              socialConnection: selectedSocial + 1,
+              note: reflectionController.text,
+            ),
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ApiService.readableError(error))),
+      );
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -155,7 +191,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
           // ------------------------------------------------
 
           _sliderCard(
-            title: 'How intense does this feeling feel?',
+            title: 'How stressed do you feel today?',
             valueText: '${intensity.round()}%',
             value: intensity,
             min: 0,
@@ -308,7 +344,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: analyzeMood,
+              onPressed: _isSaving ? null : analyzeMood,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF56745B),
                 foregroundColor: Colors.white,

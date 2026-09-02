@@ -7,8 +7,12 @@ const authRoutes = require("./src/routes/authRoutes");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",").map((origin) => origin.trim())
+  : null;
+
+app.use(cors({ origin: allowedOrigins || true }));
+app.use(express.json({ limit: "1mb" }));
 
 app.use("/api/auth", authRoutes);
 

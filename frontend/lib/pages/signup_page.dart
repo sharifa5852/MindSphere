@@ -156,10 +156,7 @@ class _SignupPageState extends State<SignupPage> {
 
       // Firebase account may already exist even though the backend
       // sync failed — the next login attempt will retry the sync.
-      showMessage(
-        'Account created, but your profile could not be saved. '
-        'Please try logging in again.',
-      );
+      showMessage(ApiService.readableError(e));
     } finally {
       if (mounted) setState(() => isSubmitting = false);
     }
@@ -405,7 +402,7 @@ class _SignupPageState extends State<SignupPage> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: lavender.withOpacity(0.45),
+                color: lavender.withValues(alpha: 0.45),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(

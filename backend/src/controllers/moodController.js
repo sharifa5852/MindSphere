@@ -3,9 +3,12 @@ const MoodEntry = require("../models/MoodEntry");
 const isNumberInRange = (value, min, max) =>
   typeof value === "number" && value >= min && value <= max;
 
+const roundToTwo = (value) =>
+  Number((typeof value === "number" ? value : 0).toFixed(2));
+
 const createMoodEntry = async (req, res) => {
   try {
-    const { mood, stress, sleep, note, date } = req.body;
+    const { mood, stress, energy, sleep, socialConnection, note, date } = req.body;
 
     if (!isNumberInRange(mood, 1, 5)) {
       return res.status(400).json({
@@ -14,19 +17,33 @@ const createMoodEntry = async (req, res) => {
       });
     }
 
-    if (stress !== undefined && !isNumberInRange(stress, 1, 5)) {
+    if (!isNumberInRange(stress, 1, 5)) {
       return res.status(400).json({
         success: false,
         message: "Stress must be a number between 1 and 5.",
       });
     }
 
-   if (sleep !== undefined && (typeof sleep !== "number" || sleep < 0 || sleep > 24)) {
-  return res.status(400).json({
-    success: false,
-    message: "Sleep must be a number between 0 and 24.",
-  });
-}
+    if (!isNumberInRange(energy, 0, 100)) {
+      return res.status(400).json({
+        success: false,
+        message: "Energy must be a number between 0 and 100.",
+      });
+    }
+
+    if (typeof sleep !== "number" || sleep < 0 || sleep > 24) {
+      return res.status(400).json({
+        success: false,
+        message: "Sleep must be a number between 0 and 24.",
+      });
+    }
+
+    if (!isNumberInRange(socialConnection, 1, 4)) {
+      return res.status(400).json({
+        success: false,
+        message: "Social connection must be a number between 1 and 4.",
+      });
+    }
 
     if (note !== undefined && typeof note !== "string") {
       return res.status(400).json({
@@ -46,7 +63,9 @@ const createMoodEntry = async (req, res) => {
       userId: req.firebaseUser.uid,
       mood,
       stress,
+      energy,
       sleep,
+      socialConnection,
       note: note?.trim(),
       date: date ? new Date(date) : new Date(),
     });
@@ -110,7 +129,9 @@ const getWeeklyMoodSummary = async (req, res) => {
           _id: null,
           averageMood: { $avg: "$mood" },
           averageStress: { $avg: "$stress" },
+          averageEnergy: { $avg: "$energy" },
           averageSleep: { $avg: "$sleep" },
+          averageSocialConnection: { $avg: "$socialConnection" },
           totalCheckIns: { $sum: 1 },
         },
       },
@@ -119,7 +140,9 @@ const getWeeklyMoodSummary = async (req, res) => {
     const averages = summary[0] || {
       averageMood: 0,
       averageStress: 0,
+      averageEnergy: 0,
       averageSleep: 0,
+      averageSocialConnection: 0,
       totalCheckIns: 0,
     };
 
@@ -131,9 +154,11 @@ const getWeeklyMoodSummary = async (req, res) => {
       },
       summary: {
         totalCheckIns: averages.totalCheckIns,
-        averageMood: Number(averages.averageMood.toFixed(2)),
-        averageStress: Number(averages.averageStress.toFixed(2)),
-        averageSleep: Number(averages.averageSleep.toFixed(2)),
+        averageMood: roundToTwo(averages.averageMood),
+        averageStress: roundToTwo(averages.averageStress),
+        averageEnergy: roundToTwo(averages.averageEnergy),
+        averageSleep: roundToTwo(averages.averageSleep),
+        averageSocialConnection: roundToTwo(averages.averageSocialConnection),
       },
       entries: weeklyEntries,
     });

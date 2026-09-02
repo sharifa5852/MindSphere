@@ -25,11 +25,11 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomePage(),
-      MoodCheckInPage(),
-      AiCompanionPage(),
-      InsightsPage(),
-      ProfilePage(),
+      const HomePage(),
+      const MoodCheckInPage(),
+      const AiCompanionPage(),
+      const InsightsPage(),
+      const ProfilePage(),
     ];
 
     return Scaffold(

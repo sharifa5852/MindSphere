@@ -63,6 +63,11 @@ const generateWellnessResponse = async (message, history = []) => {
       systemInstruction: wellnessSystemInstruction,
       temperature: 0.5,
       maxOutputTokens: 350,
+      // Keep conversational replies short and reserve the output budget for
+      // the user-visible answer instead of internal reasoning tokens.
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
       safetySettings: [
         {
           category: "HARM_CATEGORY_HARASSMENT",

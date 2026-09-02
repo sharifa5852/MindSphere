@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../services/api_service.dart';
+
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
 
@@ -8,412 +10,180 @@ class JournalPage extends StatefulWidget {
 }
 
 class _JournalPageState extends State<JournalPage> {
-  // Controller for the journal text box
-  final TextEditingController journalController = TextEditingController();
+  final _controller = TextEditingController();
+  List<Map<String, dynamic>> _entries = [];
+  Map<String, dynamic>? _analysis;
+  bool _isLoading = true;
+  bool _isSaving = false;
 
-  // Controls whether the Mood Lens is shown
-  bool showAnalysis = false;
+  @override
+  void initState() {
+    super.initState();
+    _loadEntries();
+  }
 
   @override
   void dispose() {
-    journalController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
-  // Called when the user presses Save & Reflect
-  void analyzeJournal() {
-    if (journalController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please write something first.'),
-        ),
-      );
+  Future<void> _loadEntries() async {
+    try {
+      final entries = await ApiService.getJournalEntries();
+      if (mounted) setState(() => _entries = entries);
+    } catch (_) {
+      if (mounted) _showMessage('Could not load journal entries.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
-      return;
+Future<void> _saveAndReflect() async {
+  final text = _controller.text.trim();
+  if (text.isEmpty) {
+    _showMessage('Please write something first.');
+    return;
+  }
+  setState(() => _isSaving = true);
+  try {
+    final saved = await ApiService.createJournalEntry(text);
+    final entry = Map<String, dynamic>.from(saved['journalEntry'] as Map);
+
+    // Show the saved entry right away, even before analysis comes back.
+    if (mounted) {
+      setState(() {
+        _entries = [entry, ..._entries];
+        _controller.clear();
+      });
     }
 
-    setState(() {
-      showAnalysis = true;
-    });
+    try {
+      final analysisResponse = await ApiService.analyzeJournalEntry(entry['_id'] as String);
+      final analysis = Map<String, dynamic>.from(analysisResponse['analysis'] as Map);
+      if (!mounted) return;
+      setState(() {
+        _analysis = analysis;
+        _entries = [
+          {...entry, ...analysis},
+          ..._entries.skip(1),
+        ];
+      });
+    } catch (analysisError) {
+      // Entry is safely saved; only the reflection failed.
+      if (mounted) _showMessage('Saved, but the reflection could not be generated right now.');
+    }
+  } catch (error) {
+    if (mounted) _showMessage(_errorText(error));
+  } finally {
+    if (mounted) setState(() => _isSaving = false);
   }
+}
+
+  void _showMessage(String message) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFAF8F3),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFFAF8F3),
-        elevation: 0,
-        title: const Text(
-          'Journal',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF403E38),
-          ),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          // ------------------------------------
-          // PAGE TITLE
-          // ------------------------------------
-
-          const Text(
-            'How was your day?',
-            style: TextStyle(
-              fontSize: 27,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF403E38),
+      appBar: AppBar(backgroundColor: const Color(0xFFFAF8F3), elevation: 0, title: const Text('Journal', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF403E38)))),
+      body: RefreshIndicator(
+        onRefresh: _loadEntries,
+        child: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const Text('How was your day?', style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold, color: Color(0xFF403E38))),
+            const SizedBox(height: 8),
+            const Text('Write freely about your thoughts, feelings, or anything that happened today.', style: TextStyle(color: Color(0xFF827C73), fontSize: 15)),
+            const SizedBox(height: 18),
+            TextField(
+              controller: _controller,
+              maxLines: 8,
+              maxLength: 5000,
+              decoration: InputDecoration(hintText: 'Write whatever is on your mind...', filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: const BorderSide(color: Color(0xFFE9E3D9)))),
             ),
-          ),
-
-          const SizedBox(height: 8),
-
-          const Text(
-            'Write freely about your thoughts, feelings, '
-            'or anything that happened today.',
-            style: TextStyle(
-              color: Color(0xFF827C73),
-              fontSize: 15,
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          // ------------------------------------
-          // JOURNAL TEXT BOX
-          // ------------------------------------
-
-          TextField(
-            controller: journalController,
-            maxLines: 8,
-            decoration: InputDecoration(
-              hintText: 'Write whatever is on your mind...',
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: const BorderSide(
-                  color: Color(0xFFE9E3D9),
-                ),
+            const SizedBox(height: 15),
+            SizedBox(
+              height: 52,
+              child: FilledButton(
+                onPressed: _isSaving ? null : _saveAndReflect,
+                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF56745B), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
+                child: _isSaving ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5)) : const Text('Save & Reflect', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
-          ),
-
-          const SizedBox(height: 15),
-
-          // ------------------------------------
-          // SAVE & REFLECT BUTTON
-          // ------------------------------------
-
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: FilledButton(
-              onPressed: analyzeJournal,
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF56745B),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-              child: Text(
-                showAnalysis ? 'Reflection Ready ✓' : 'Save & Reflect',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-
-          // ------------------------------------
-          // MOOD LENS
-          // ------------------------------------
-
-          if (showAnalysis) ...[
-            const SizedBox(height: 20),
-            const MoodLensCard(),
+            if (_analysis != null) ...[
+              const SizedBox(height: 20),
+              _AnalysisCard(analysis: _analysis!),
+            ],
+            const SizedBox(height: 25),
+            const Text('Recent Entries', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            if (_isLoading)
+              const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()))
+            else if (_entries.isEmpty)
+              const _EmptyJournalState()
+            else
+              ..._entries.map((entry) => _JournalEntryCard(entry: entry)),
           ],
-
-          const SizedBox(height: 25),
-
-          // ------------------------------------
-          // RECENT ENTRIES
-          // ------------------------------------
-
-          const Text(
-            'Recent Entries',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: const Color(0xFFE9E3D9),
-              ),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'August 10',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  '"Today was pretty stressful, '
-                  'but I managed to take a walk."',
-                  style: TextStyle(
-                    color: Color(0xFF827C73),
-                    height: 1.4,
-                  ),
-                ),
-                SizedBox(height: 10),
-                MoodTag(
-                  text: '😣 Stressed',
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 30),
-        ],
+        ),
       ),
     );
   }
 }
 
-// ======================================================
-// MOOD LENS CARD
-// ======================================================
-
-class MoodLensCard extends StatelessWidget {
-  const MoodLensCard({super.key});
+class _AnalysisCard extends StatelessWidget {
+  const _AnalysisCard({required this.analysis});
+  final Map<String, dynamic> analysis;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEEF5EB),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: const Color(0xFFDCE6D8),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ------------------------------------
-          // HEADER
-          // ------------------------------------
+    final emotion = (analysis['emotion'] as String?)?.trim();
+    final reflection = analysis['reflection'] as String? ?? analysis['summary'] as String? ?? 'Your reflection is ready.';
+    return _card(color: const Color(0xFFEEF5EB), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      const Text('Journal reflection', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      if (emotion != null && emotion.isNotEmpty) ...[const SizedBox(height: 8), _Tag(text: emotion)],
+      const SizedBox(height: 12),
+      Text(reflection, style: const TextStyle(color: Color(0xFF403E38), height: 1.4)),
+      const SizedBox(height: 10),
+      const Text('This is a general wellness reflection, not a medical diagnosis.', style: TextStyle(fontSize: 11, color: Color(0xFF827C73))),
+    ]));
+  }
+}
 
-          const Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: Color(0xFFA8C3A0),
-                child: Icon(
-                  Icons.auto_awesome,
-                  color: Color(0xFF56745B),
-                ),
-              ),
-              SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Journal Mood Lens',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    'Emotion analysis',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF827C73),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+class _JournalEntryCard extends StatelessWidget {
+  const _JournalEntryCard({required this.entry});
+  final Map<String, dynamic> entry;
 
-          const SizedBox(height: 15),
-
-          // ------------------------------------
-          // EMOTIONS
-          // ------------------------------------
-
-          const Wrap(
-            spacing: 8,
-            children: [
-              MoodTag(
-                text: '😣 Stressed',
-                active: true,
-              ),
-              MoodTag(
-                text: '😐 Neutral',
-              ),
-              MoodTag(
-                text: '🌿 Calm',
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 18),
-
-          // ------------------------------------
-          // CONFIDENCE
-          // ------------------------------------
-
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Model confidence',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF827C73),
-                ),
-              ),
-              Text(
-                '84%',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 7),
-
-          const LinearProgressIndicator(
-            value: 0.84,
-            color: Color(0xFF56745B),
-            backgroundColor: Color(0xFFDCE6D8),
-            minHeight: 7,
-          ),
-
-          const SizedBox(height: 18),
-
-          // ------------------------------------
-          // REFLECTION
-          // ------------------------------------
-
-          const Text(
-            'A gentle reflection',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
-          const Text(
-            'Your writing may reflect academic stress. '
-            'Taking a short break or talking with someone '
-            'you trust may help.',
-            style: TextStyle(
-              color: Color(0xFF827C73),
-              height: 1.4,
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          // ------------------------------------
-          // AI BUTTON
-          // ------------------------------------
-
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Breathing exercise will be connected later.',
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(
-                Icons.air,
-              ),
-              label: const Text(
-                'Try a 2-minute breathing exercise',
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          const Text(
-            'Emotional support only — not a medical diagnosis.',
-            style: TextStyle(
-              fontSize: 11,
-              color: Color(0xFF827C73),
-            ),
-          ),
-        ],
-      ),
+  @override
+  Widget build(BuildContext context) {
+    final text = entry['text'] as String? ?? '';
+    final date = DateTime.tryParse(entry['date'] as String? ?? '');
+    final emotion = entry['emotion'] as String?;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: _card(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(date == null ? 'Journal entry' : '${date.day}/${date.month}/${date.year}', style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Text(text, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFF827C73), height: 1.4)),
+        if (emotion != null && emotion.isNotEmpty) ...[const SizedBox(height: 10), _Tag(text: emotion)],
+      ])),
     );
   }
 }
 
-// ======================================================
-// MOOD TAG
-// ======================================================
+class _EmptyJournalState extends StatelessWidget {
+  const _EmptyJournalState();
+  @override
+  Widget build(BuildContext context) => const Padding(padding: EdgeInsets.all(16), child: Text('Your saved journal entries will appear here.', textAlign: TextAlign.center, style: TextStyle(color: Color(0xFF827C73))));
+}
 
-class MoodTag extends StatelessWidget {
+class _Tag extends StatelessWidget {
+  const _Tag({required this.text});
   final String text;
-
-  final bool active;
-
-  const MoodTag({
-    super.key,
-    required this.text,
-    this.active = false,
-  });
-
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 9,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: active ? const Color(0xFFD9EAD5) : Colors.white,
-        borderRadius: BorderRadius.circular(9),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: active ? FontWeight.bold : FontWeight.normal,
-          color: active ? const Color(0xFF56745B) : const Color(0xFF403E38),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Container(padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6), decoration: BoxDecoration(color: const Color(0xFFD9EAD5), borderRadius: BorderRadius.circular(9)), child: Text(text, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF56745B))));
 }
+
+Widget _card({required Widget child, Color color = Colors.white}) => Container(padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(20), border: Border.all(color: const Color(0xFFE9E3D9))), child: child);
+
+String _errorText(Object error) => ApiService.readableError(error);

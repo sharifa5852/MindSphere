@@ -1,17 +1,25 @@
-# mindsphere
+# MindSphere Flutter app
 
-A new Flutter project.
+## API configuration
 
-## Getting Started
+The API address is configured at build time; it is not committed in source code.
 
-This project is a starting point for a Flutter application.
+For an Android emulator with the backend running on this computer:
 
-A few resources to get you started if this is your first Flutter project:
+```powershell
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+For a physical phone, replace the value with your computer's current LAN address:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```powershell
+flutter run --dart-define=API_BASE_URL=http://192.168.x.x:5000/api
+```
+
+For a production build, pass an HTTPS API address:
+
+```powershell
+flutter build apk --dart-define=API_BASE_URL=https://api.example.com/api
+```
+
+Do not put API keys, MongoDB credentials, or Firebase Admin credentials in the Flutter app.
