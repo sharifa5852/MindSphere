@@ -30,6 +30,20 @@ const journalEntrySchema = new mongoose.Schema(
       trim: true,
       maxlength: 1000,
     },
+    reflection: {
+      type: String,
+      default: null,
+      trim: true,
+      maxlength: 1000,
+    },
+    needsSupportPrompt: {
+      type: Boolean,
+      default: false,
+    },
+    analysisMode: {
+      type: String,
+      default: null,
+    },
     date: {
       type: Date,
       default: Date.now,

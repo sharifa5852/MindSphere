@@ -15,3 +15,9 @@ frontend/google-services-backup.json
 # System/editor files
 .DS_Store
 .vscode/
+#emotion service
+emotion_service/.venv/
+__pycache__/
+*.pyc
+.env
+*.log

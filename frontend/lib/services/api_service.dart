@@ -104,6 +104,11 @@ class ApiService {
     throw Exception(responseBody['message'] ?? 'Failed to save mood check-in.');
   }
 
+  static Future<Map<String, dynamic>> analyzeMoodEntry(String moodEntryId, {String mode = 'gemini'}) async {
+    final headers = await _getHeaders();
+    final response = await _post('$baseUrl/moods/$moodEntryId/analyze', headers, {'mode': mode});
+    return _readResponse(response, successCodes: const [200]);
+  }
   static Future<Map<String, dynamic>> getWeeklyMoodSummary() async {
     final headers = await _getHeaders();
     final response = await _get('$baseUrl/moods/weekly', headers);
@@ -124,9 +129,9 @@ class ApiService {
     return _readResponse(response, successCodes: const [201]);
   }
 
-  static Future<Map<String, dynamic>> analyzeJournalEntry(String journalId) async {
+  static Future<Map<String, dynamic>> analyzeJournalEntry(String journalId, {String mode = 'gemini'}) async {
     final headers = await _getHeaders();
-    final response = await _post('$baseUrl/ai/journal-analysis', headers, {'journalId': journalId});
+    final response = await _post('$baseUrl/ai/journal-analysis', headers, {'journalId': journalId, 'mode': mode});
     return _readResponse(response, successCodes: const [200]);
   }
 

@@ -181,9 +181,129 @@ Keep it under 120 words.
 
   return text;
 };
+const analyzeMoodCheckIn = async (moodData) => {
+  const ai = await getGeminiClient();
 
+  const { mood, stress, energy, sleep, socialConnection, note } = moodData;
+
+  const response = await ai.models.generateContent({
+    model: modelName(),
+    contents: `
+Analyze this mood check-in as a general wellness reflection.
+
+Mood (1=very positive, 5=very negative): ${mood}
+Stress (1=low, 5=very high): ${stress}
+Energy (0-100): ${energy}
+Sleep (hours): ${sleep}
+Social connection (1=connected, 4=very withdrawn): ${socialConnection}
+Optional note from the user: "${note || ""}"
+`,
+    config: {
+      systemInstruction: `
+${wellnessSystemInstruction}
+
+Return JSON only. Do not diagnose. Identify the single most likely everyday emotion word (e.g. "Calm", "Nervousness", "Sadness", "Content", "Overwhelmed"), a confidence between 0 and 1, up to 3 other plausible emotions with lower scores between 0 and 1, and a short one or two sentence supportive insight under 40 words.
+`,
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "object",
+        properties: {
+          emotion: { type: "string" },
+          confidence: { type: "number" },
+          otherEmotions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                label: { type: "string" },
+                score: { type: "number" },
+              },
+              required: ["label", "score"],
+            },
+          },
+          insight: { type: "string" },
+        },
+        required: ["emotion", "confidence", "otherEmotions", "insight"],
+      },
+    },
+  });
+
+  const text = response.text?.trim();
+
+  if (!text) {
+    throw new Error("Gemini did not return mood analysis.");
+  }
+
+  return JSON.parse(text);
+};
+const generateInsightForDetectedEmotion = async (moodData, emotionLabel) => {
+  const ai = await getGeminiClient();
+  const { mood, stress, energy, sleep, socialConnection, note } = moodData;
+
+  const response = await ai.models.generateContent({
+    model: modelName(),
+    contents: `
+A trained emotion-detection model analyzed the user's reflection and detected the primary emotion: "${emotionLabel}".
+
+Mood (1=very positive, 5=very negative): ${mood}
+Stress (1=low, 5=very high): ${stress}
+Energy (0-100): ${energy}
+Sleep (hours): ${sleep}
+Social connection (1=connected, 4=very withdrawn): ${socialConnection}
+User's reflection: "${note || ""}"
+
+Write a short, warm, supportive insight (1-2 sentences, under 40 words) that acknowledges this detected emotion.
+`,
+    config: {
+      systemInstruction: `${wellnessSystemInstruction}\n\nReturn plain text only. Do not diagnose. Write naturally, do not just repeat the emotion label mechanically.`,
+      temperature: 0.5,
+      maxOutputTokens: 150,
+      thinkingConfig: { thinkingBudget: 0 },
+    },
+  });
+
+  const text = response.text?.trim();
+  if (!text) {
+    throw new Error("Gemini did not return an insight.");
+  }
+  return text;
+};
+const generateJournalReflectionForEmotion = async (journalText, emotionLabel) => {
+  const ai = await getGeminiClient();
+
+  const response = await ai.models.generateContent({
+    model: modelName(),
+    contents: `
+A trained emotion-detection model analyzed this private journal entry and detected the primary emotion: "${emotionLabel}".
+
+Journal entry:
+"""${journalText}"""
+
+Write a short, warm, comforting reflection (1-2 sentences, under 60 words) that acknowledges this detected emotion.
+`,
+    config: {
+      systemInstruction: `
+${wellnessSystemInstruction}
+
+Return plain text only. Do not diagnose. Write naturally, do not just repeat the emotion label mechanically.
+`,
+      temperature: 0.5,
+      maxOutputTokens: 150,
+      thinkingConfig: { thinkingBudget: 0 },
+    },
+  });
+
+  const text = response.text?.trim();
+  if (!text) {
+    throw new Error("Gemini did not return a journal reflection.");
+  }
+  return text;
+};
 module.exports = {
   generateWellnessResponse,
   analyzeJournalEntry,
   generateWeeklyInsight,
+  analyzeMoodCheckIn,
+  generateJournalReflectionForEmotion,
+  generateInsightForDetectedEmotion,
 };

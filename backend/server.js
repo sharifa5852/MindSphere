@@ -50,3 +50,22 @@ app.use("/api/reports", reportRoutes);
 const aiRoutes = require("./src/routes/aiRoutes");
 app.use("/api/ai", aiRoutes);
 startServer();
+
+
+
+// temp
+
+const { detectEmotions } = require("./src/services/emotionService");
+
+app.get("/api/test-emotion", async (req, res) => {
+  const text = req.query.text;
+  if (!text) {
+    return res.status(400).json({ success: false, message: "Provide ?text=... in the URL." });
+  }
+  try {
+    const emotions = await detectEmotions(text);
+    return res.status(200).json({ success: true, emotions });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});

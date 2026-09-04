@@ -45,7 +45,8 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
       setState(() {
         _messages.add({
           'sender': 'ai',
-          'message': response['response'] as String? ?? 'I could not prepare a response right now.',
+          'message': response['response'] as String? ??
+              'I could not prepare a response right now.',
           'isSafetyResponse': response['isSafetyResponse'] == true,
         });
       });
@@ -85,16 +86,22 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFAF8F3),
         elevation: 0,
-        title: const Text('MindSphere AI', style: TextStyle(color: Color(0xFF403E38), fontWeight: FontWeight.bold)),
+        title: const Text('MindSphere AI',
+            style: TextStyle(
+                color: Color(0xFF403E38), fontWeight: FontWeight.bold)),
       ),
       body: Column(
         children: [
           Container(
             margin: const EdgeInsets.fromLTRB(20, 10, 20, 10),
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: const Color(0xFFE7E0EF), borderRadius: BorderRadius.circular(20)),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Quick Help', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            decoration: BoxDecoration(
+                color: const Color(0xFFE7E0EF),
+                borderRadius: BorderRadius.circular(20)),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Quick Help',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
               Wrap(spacing: 8, runSpacing: 8, children: [
                 _quickButton('I\'m stressed'),
@@ -106,7 +113,10 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
           ),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Text('MindSphere AI offers general wellness support and is not a substitute for professional or emergency care.', style: TextStyle(fontSize: 11, color: Color(0xFF827C73), height: 1.35)),
+            child: Text(
+                'MindSphere AI offers general wellness support and is not a substitute for professional or emergency care.',
+                style: TextStyle(
+                    fontSize: 11, color: Color(0xFF827C73), height: 1.35)),
           ),
           Expanded(
             child: ListView.builder(
@@ -126,36 +136,46 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
   }
 
   Widget _inputArea() => Container(
-    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-    color: const Color(0xFFFAF8F3),
-    child: Row(children: [
-      Expanded(
-        child: TextField(
-          controller: _messageController,
-          enabled: !_isSending,
-          maxLength: 2000,
-          minLines: 1,
-          maxLines: 4,
-          textInputAction: TextInputAction.send,
-          onSubmitted: (_) => _sendMessage(),
-          decoration: InputDecoration(counterText: '', hintText: 'Type a message...', filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none)),
-        ),
-      ),
-      const SizedBox(width: 8),
-      IconButton(
-        onPressed: _isSending ? null : _sendMessage,
-        style: IconButton.styleFrom(backgroundColor: const Color(0xFF56745B), foregroundColor: Colors.white, padding: const EdgeInsets.all(14)),
-        icon: const Icon(Icons.send),
-      ),
-    ]),
-  );
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        color: const Color(0xFFFAF8F3),
+        child: Row(children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              enabled: !_isSending,
+              maxLength: 2000,
+              minLines: 1,
+              maxLines: 4,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (_) => _sendMessage(),
+              decoration: InputDecoration(
+                  counterText: '',
+                  hintText: 'Type a message...',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(18),
+                      borderSide: BorderSide.none)),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: _isSending ? null : _sendMessage,
+            style: IconButton.styleFrom(
+                backgroundColor: const Color(0xFF56745B),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.all(14)),
+            icon: const Icon(Icons.send),
+          ),
+        ]),
+      );
 
   Widget _quickButton(String text) => ActionChip(
-    label: Text(text),
-    onPressed: _isSending ? null : () => _sendQuickMessage(text),
-    backgroundColor: Colors.white,
-    side: BorderSide.none,
-  );
+        label: Text(text),
+        onPressed: _isSending ? null : () => _sendQuickMessage(text),
+        backgroundColor: Colors.white,
+        side: BorderSide.none,
+      );
 }
 
 class _ChatBubble extends StatelessWidget {
@@ -173,10 +193,13 @@ class _ChatBubble extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         constraints: const BoxConstraints(maxWidth: 300),
         decoration: BoxDecoration(
-          color: isUser ? const Color(0xFFDDEBD9) : (isSafetyResponse ? const Color(0xFFF6EDCC) : Colors.white),
+          color: isUser
+              ? const Color(0xFFDDEBD9)
+              : (isSafetyResponse ? const Color(0xFFF6EDCC) : Colors.white),
           borderRadius: BorderRadius.circular(18),
         ),
-        child: Text(message['message'] as String? ?? '', style: const TextStyle(color: Color(0xFF403E38), height: 1.4)),
+        child: Text(message['message'] as String? ?? '',
+            style: const TextStyle(color: Color(0xFF403E38), height: 1.4)),
       ),
     );
   }
@@ -186,11 +209,17 @@ class _TypingBubble extends StatelessWidget {
   const _TypingBubble();
   @override
   Widget build(BuildContext context) => const Align(
-    alignment: Alignment.centerLeft,
-    child: Padding(padding: EdgeInsets.symmetric(vertical: 10), child: Row(mainAxisSize: MainAxisSize.min, children: [
-      SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)),
-      SizedBox(width: 10),
-      Text('MindSphere AI is thinking...', style: TextStyle(color: Color(0xFF827C73))),
-    ])),
-  );
+        alignment: Alignment.centerLeft,
+        child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+              SizedBox(width: 10),
+              Text('MindSphere AI is thinking...',
+                  style: TextStyle(color: Color(0xFF827C73))),
+            ])),
+      );
 }

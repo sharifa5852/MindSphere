@@ -9,13 +9,37 @@ const {
   generateWellnessResponse,
   analyzeJournalEntry,
   generateWeeklyInsight,
+  generateJournalReflectionForEmotion,
 } = require("../services/geminiService");
+
+const { detectEmotions } = require("../services/emotionService");
 
 const {
   hasCrisisLanguage,
   getCrisisResponse,
   detectEmotion,
 } = require("../utils/aiSafety");
+
+const capitalize = (text) =>
+  typeof text === "string" && text.length
+    ? text.charAt(0).toUpperCase() + text.slice(1)
+    : text;
+
+const POSITIVE_LABELS = new Set([
+  "admiration", "amusement", "approval", "caring", "desire",
+  "excitement", "gratitude", "joy", "love", "optimism", "pride", "relief",
+]);
+const NEGATIVE_LABELS = new Set([
+  "anger", "annoyance", "disappointment", "disapproval", "disgust",
+  "embarrassment", "fear", "grief", "nervousness", "remorse", "sadness",
+]);
+
+const inferSentiment = (emotionLabel) => {
+  const value = (emotionLabel || "").toLowerCase();
+  if (POSITIVE_LABELS.has(value)) return "positive";
+  if (NEGATIVE_LABELS.has(value)) return "negative";
+  return "neutral";
+};
 
 const chatWithAi = async (req, res) => {
   try {
@@ -85,7 +109,8 @@ const chatWithAi = async (req, res) => {
 
 const analyzeJournal = async (req, res) => {
   try {
-    const { journalId } = req.body;
+    const { journalId, mode } = req.body;
+    const requestedMode = mode === "trained_model" ? "trained_model" : "gemini";
 
     if (!mongoose.isValidObjectId(journalId)) {
       return res.status(400).json({
@@ -106,8 +131,10 @@ const analyzeJournal = async (req, res) => {
       });
     }
 
-    let analysis;
+    let analysis = null;
+    let actualMode = requestedMode;
 
+    // Safety check always takes priority over any chosen analysis mode.
     if (hasCrisisLanguage(journalEntry.text)) {
       analysis = {
         sentiment: "negative",
@@ -116,17 +143,56 @@ const analyzeJournal = async (req, res) => {
         reflection: getCrisisResponse(),
         needsSupportPrompt: true,
       };
-    } else {
+      actualMode = "safety";
+    } else if (requestedMode === "trained_model") {
+      try {
+        const detected = await detectEmotions(journalEntry.text);
+        if (!detected.length) {
+          throw new Error("No emotions detected above threshold.");
+        }
+        const sorted = [...detected].sort((a, b) => b.score - a.score);
+        const top = sorted[0];
+
+        let reflection;
+        try {
+          reflection = await generateJournalReflectionForEmotion(
+            journalEntry.text,
+            top.label
+          );
+        } catch (reflectionError) {
+          console.error("Gemini reflection generation failed:", reflectionError.message);
+          reflection = `Your entry suggests a sense of ${top.label.toLowerCase()}. Be gentle with yourself today.`;
+        }
+
+        analysis = {
+          sentiment: inferSentiment(top.label),
+          emotion: capitalize(top.label),
+          summary: `Detected emotion: ${capitalize(top.label)} (trained model).`,
+          reflection,
+          needsSupportPrompt: false,
+        };
+      } catch (modelError) {
+        console.error("Trained model journal analysis failed, falling back to Gemini:", modelError.message);
+        actualMode = "gemini";
+      }
+    }
+
+    if (!analysis) {
       analysis = await analyzeJournalEntry(journalEntry.text);
+      actualMode = actualMode === "trained_model" ? "gemini" : actualMode;
     }
 
     journalEntry.sentiment = analysis.sentiment;
     journalEntry.emotion = analysis.emotion;
     journalEntry.summary = analysis.summary;
+    journalEntry.reflection = analysis.reflection;
+    journalEntry.needsSupportPrompt = analysis.needsSupportPrompt;
+    journalEntry.analysisMode = actualMode;
     await journalEntry.save();
 
     return res.status(200).json({
       success: true,
+      mode: actualMode,
       analysis: {
         sentiment: analysis.sentiment,
         emotion: analysis.emotion,
