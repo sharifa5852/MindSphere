@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../app_shell.dart';
+import 'email_verification_page.dart';
 import 'welcome_page.dart';
 
 class AuthGate extends StatelessWidget {
@@ -12,23 +13,21 @@ class AuthGate extends StatelessWidget {
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // Still checking whether a session exists — show a brief loader
-        // instead of flashing the WelcomePage first.
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             backgroundColor: Color(0xFFFAF8F3),
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        // A signed-in Firebase user exists (survives app restarts).
         if (snapshot.hasData) {
-          return const AppShell();
+          final user = snapshot.data!;
+          if (user.emailVerified) {
+            return const AppShell();
+          }
+          return const EmailVerificationPage();
         }
 
-        // No signed-in user.
         return const WelcomePage();
       },
     );

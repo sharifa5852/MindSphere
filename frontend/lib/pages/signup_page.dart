@@ -1,3 +1,4 @@
+import 'email_verification_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -103,6 +104,9 @@ class _SignupPageState extends State<SignupPage> {
       debugPrint('Firebase email: ${user.email}');
 
       await user.updateDisplayName(name);
+     
+         // Send the verification email now, right after the account is created.
+      await user.sendEmailVerification();
 
       if (!mounted) return;
       showMessage('Saving your profile...');
@@ -113,7 +117,7 @@ class _SignupPageState extends State<SignupPage> {
 
       if (!mounted) return;
 
-      showMessage('Account created successfully ✓');
+      showMessage('Account created — check your email to verify ✓');
 
       await Future.delayed(const Duration(milliseconds: 700));
 
@@ -121,7 +125,7 @@ class _SignupPageState extends State<SignupPage> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const AppShell()),
+        MaterialPageRoute(builder: (_) => const EmailVerificationPage()),
       );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;

@@ -34,4 +34,20 @@ class AuthService {
   User? get currentUser {
     return _auth.currentUser;
   }
+
+  // Sends a verification email to the currently signed-in user, if not
+  // already verified. Safe to call multiple times (e.g. from a "resend" button).
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    }
+  }
+
+  // Reloads the current user's data from Firebase (picks up emailVerified
+  // changes made by clicking the link) and returns the fresh verified status.
+  Future<bool> reloadAndCheckVerified() async {
+    await _auth.currentUser?.reload();
+    return _auth.currentUser?.emailVerified ?? false;
+  }
 }
