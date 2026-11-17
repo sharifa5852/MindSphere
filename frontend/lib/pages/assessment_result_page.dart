@@ -190,7 +190,7 @@ class AssessmentResultPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.08),
+            color: darkGreen.withValues(alpha: 0.08),
             blurRadius: 26,
             offset: const Offset(0, 11),
           ),
@@ -205,7 +205,7 @@ class AssessmentResultPage extends StatelessWidget {
               width: 125,
               height: 125,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.17),
+                color: Colors.white.withValues(alpha: 0.17),
                 shape: BoxShape.circle,
               ),
             ),
@@ -217,7 +217,7 @@ class AssessmentResultPage extends StatelessWidget {
               width: 95,
               height: 95,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
             ),
@@ -228,7 +228,7 @@ class AssessmentResultPage extends StatelessWidget {
                 width: 68,
                 height: 68,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.70),
+                  color: Colors.white.withValues(alpha: 0.70),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -276,7 +276,7 @@ class AssessmentResultPage extends StatelessWidget {
                   vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.64),
+                  color: Colors.white.withValues(alpha: 0.64),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Text(
@@ -423,7 +423,7 @@ class AssessmentResultPage extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.035),
+            color: darkGreen.withValues(alpha: 0.035),
             blurRadius: 12,
             offset: const Offset(0, 5),
           ),
@@ -597,7 +597,7 @@ class AssessmentResultPage extends StatelessWidget {
         border: Border.all(color: softBorder),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.035),
+            color: darkGreen.withValues(alpha: 0.035),
             blurRadius: 12,
             offset: const Offset(0, 5),
           ),

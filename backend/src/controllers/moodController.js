@@ -18,15 +18,11 @@ const capitalize = (text) =>
     : text;
 
 const FALLBACK_ANALYSIS = {
-  emotion: "Nervousness",
-  confidence: 0.84,
-  otherEmotions: [
-    { label: "Fear", score: 0.09 },
-    { label: "Sadness", score: 0.04 },
-    { label: "Neutral", score: 0.03 },
-  ],
+  emotion: null,
+  confidence: null,
+  otherEmotions: [],
   insight:
-    "Your answers suggest language associated with nervousness. This is a general reflection, not a diagnosis.",
+    "Your check-in was saved. An emotion reflection is unavailable right now. Please try again later.",
 };
 
 const createMoodEntry = async (req, res) => {

@@ -10,12 +10,7 @@ import '../services/api_service.dart';
 const _primary = Color(0xFFBFE3C0);
 const _paleMint = Color(0xFFD9F0DC);
 const _freshMint = Color(0xFFC9EACB);
-const _calmMint = Color(0xFFB5DFC0);
-const _sageMint = Color(0xFFAED8B8);
-const _eucalyptus = Color(0xFFA8D5B5);
-const _dustyMint = Color(0xFFA5D0B2);
 const _celadon = Color(0xFFB7DCC1);
-const _morningMint = Color(0xFFC8E7D0);
 
 const _background = Color(0xFFF3FAF5);
 const _darkGreen = Color(0xFF2D6A4F);
@@ -242,7 +237,7 @@ class _ProfessionalSupportPageState
         boxShadow: [
           BoxShadow(
             color:
-                _darkGreen.withOpacity(0.07),
+                _darkGreen.withValues(alpha: 0.07),
             blurRadius: 24,
             offset: const Offset(0, 9),
           ),
@@ -258,8 +253,8 @@ class _ProfessionalSupportPageState
               height: 125,
               decoration: BoxDecoration(
                 color:
-                    Colors.white.withOpacity(
-                  0.17,
+                    Colors.white.withValues(
+                  alpha: 0.17,
                 ),
                 shape: BoxShape.circle,
               ),
@@ -274,8 +269,8 @@ class _ProfessionalSupportPageState
               height: 85,
               decoration: BoxDecoration(
                 color:
-                    Colors.white.withOpacity(
-                  0.13,
+                    Colors.white.withValues(
+                  alpha: 0.13,
                 ),
                 shape: BoxShape.circle,
               ),
@@ -297,7 +292,7 @@ class _ProfessionalSupportPageState
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white
-                          .withOpacity(0.58),
+                          .withValues(alpha: 0.58),
                       borderRadius:
                           BorderRadius
                               .circular(20),
@@ -354,7 +349,7 @@ class _ProfessionalSupportPageState
                     const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.white
-                      .withOpacity(0.52),
+                      .withValues(alpha: 0.52),
                   borderRadius:
                       BorderRadius.circular(16),
                 ),
@@ -551,7 +546,7 @@ class _TherapistCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color:
-                _darkGreen.withOpacity(0.035),
+                _darkGreen.withValues(alpha: 0.035),
             blurRadius: 18,
             offset: const Offset(0, 7),
           ),
@@ -985,7 +980,7 @@ class _EmptyState extends StatelessWidget {
           Container(
             width: 70,
             height: 70,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: _paleMint,
               shape: BoxShape.circle,
             ),
@@ -1056,7 +1051,7 @@ class _CrisisCard extends StatelessWidget {
             height: 39,
             decoration: BoxDecoration(
               color: Colors.white
-                  .withOpacity(0.68),
+                  .withValues(alpha: 0.68),
               borderRadius:
                   BorderRadius.circular(13),
             ),

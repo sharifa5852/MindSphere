@@ -1,9 +1,7 @@
 import 'email_verification_page.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import '../app_shell.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import '../utils/auth_error_handler.dart';
@@ -231,7 +229,7 @@ class _SignupPageState extends State<SignupPage> {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: _mintPrimary.withOpacity(0.5),
+                            color: _mintPrimary.withValues(alpha: 0.5),
                             blurRadius: 22,
                             offset: const Offset(0, 10),
                           ),
@@ -283,7 +281,7 @@ class _SignupPageState extends State<SignupPage> {
                       borderRadius: BorderRadius.circular(26),
                       boxShadow: [
                         BoxShadow(
-                          color: _forestText.withOpacity(0.06),
+                          color: _forestText.withValues(alpha: 0.06),
                           blurRadius: 30,
                           offset: const Offset(0, 14),
                         ),
@@ -366,7 +364,7 @@ class _SignupPageState extends State<SignupPage> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: _mintMorning.withOpacity(0.55),
+                            color: _mintMorning.withValues(alpha: 0.55),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: _mintFresh, width: 1),
                           ),
@@ -416,7 +414,7 @@ class _SignupPageState extends State<SignupPage> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: _greenDark.withOpacity(0.35),
+                                  color: _greenDark.withValues(alpha: 0.35),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),

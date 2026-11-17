@@ -12,7 +12,6 @@ const _mintFresh = Color(0xFFC9EACB);
 const _greenDark = Color(0xFF2D6A4F);
 const _greenDarkLight = Color(0xFF3F8264);
 const _forestText = Color(0xFF1B4332);
-const _inkOnLight = Color(0xFF13291D);
 const _mutedOnLight = Color(0xFF5B7568);
 const _mintPaper = Color(0xFFF3FAF5);
 
@@ -140,7 +139,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: _mintPrimary.withOpacity(0.5),
+                            color: _mintPrimary.withValues(alpha: 0.5),
                             blurRadius: 26,
                             offset: const Offset(0, 12),
                           ),
@@ -149,7 +148,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                       child: Center(child: Text('📩', style: TextStyle(fontSize: 36 * scale))),
                     ),
                   ),
-                  SizedBox(height: 22),
+                  const SizedBox(height: 22),
                   Text(
                     'Check your email',
                     textAlign: TextAlign.center,
@@ -179,7 +178,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(26),
                       boxShadow: [
-                        BoxShadow(color: _forestText.withOpacity(0.06), blurRadius: 30, offset: const Offset(0, 14)),
+                        BoxShadow(color: _forestText.withValues(alpha: 0.06), blurRadius: 30, offset: const Offset(0, 14)),
                       ],
                     ),
                     child: Column(
@@ -196,7 +195,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                                 end: Alignment.centerRight,
                               ),
                               boxShadow: [
-                                BoxShadow(color: _greenDark.withOpacity(0.35), blurRadius: 20, offset: const Offset(0, 10)),
+                                BoxShadow(color: _greenDark.withValues(alpha: 0.35), blurRadius: 20, offset: const Offset(0, 10)),
                               ],
                             ),
                             child: FilledButton(

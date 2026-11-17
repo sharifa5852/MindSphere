@@ -17,12 +17,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
 
   static const Color primary = Color(0xFFBFE3C0);
   static const Color paleMint = Color(0xFFD9F0DC);
-  static const Color freshMint = Color(0xFFC9EACB);
-  static const Color calmMint = Color(0xFFB5DFC0);
   static const Color sageMint = Color(0xFFAED8B8);
-  static const Color eucalyptus = Color(0xFFA8D5B5);
-  static const Color dustyMint = Color(0xFFA5D0B2);
-  static const Color celadon = Color(0xFFB7DCC1);
   static const Color morningMint = Color(0xFFC8E7D0);
 
   static const Color background = Color(0xFFF3FAF5);
@@ -123,6 +118,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
@@ -241,7 +237,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: () => Navigator.pop(context),
+              onTap: () => Navigator.maybePop(context),
               child: const Padding(
                 padding: EdgeInsets.all(10),
                 child: Icon(
@@ -336,7 +332,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
                 height: 100,
                 decoration: BoxDecoration(
                   color:
-                      Colors.white.withOpacity(0.16),
+                      Colors.white.withValues(alpha: 0.16),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -349,7 +345,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
                   height: 55,
                   decoration: BoxDecoration(
                     color:
-                        Colors.white.withOpacity(0.58),
+                        Colors.white.withValues(alpha: 0.58),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -443,7 +439,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
             ? null
             : () => _sendQuickMessage(text),
         backgroundColor: Colors.white,
-        disabledColor: Colors.white.withOpacity(0.5),
+        disabledColor: Colors.white.withValues(alpha: 0.5),
         side: const BorderSide(
           color: Color(0xFFE3F0E5),
         ),
@@ -497,7 +493,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
           boxShadow: [
             BoxShadow(
               color:
-                  darkGreen.withOpacity(0.045),
+                  darkGreen.withValues(alpha: 0.045),
               blurRadius: 18,
               offset: const Offset(0, -5),
             ),
@@ -576,7 +572,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
                 boxShadow: [
                   BoxShadow(
                     color: darkGreen
-                        .withOpacity(0.12),
+                        .withValues(alpha: 0.12),
                     blurRadius: 13,
                     offset: const Offset(0, 5),
                   ),
@@ -588,7 +584,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
                     : _sendMessage,
                 color: Colors.white,
                 disabledColor:
-                    Colors.white.withOpacity(0.7),
+                    Colors.white.withValues(alpha: 0.7),
                 tooltip: 'Send',
                 icon: const Icon(
                   Icons.arrow_upward_rounded,
@@ -621,7 +617,6 @@ class _ChatBubble extends StatelessWidget {
     const mutedText = Color(0xFF5B7568);
     const primary = Color(0xFFBFE3C0);
     const paleMint = Color(0xFFD9F0DC);
-    const background = Color(0xFFF3FAF5);
 
     final isUser =
         message['sender'] == 'user';
@@ -645,8 +640,8 @@ class _ChatBubble extends StatelessWidget {
             horizontal: 16,
             vertical: 13,
           ),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
@@ -654,7 +649,7 @@ class _ChatBubble extends StatelessWidget {
                 paleMint,
               ],
             ),
-            borderRadius: const BorderRadius.only(
+            borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
               bottomLeft: Radius.circular(20),
@@ -689,7 +684,7 @@ class _ChatBubble extends StatelessWidget {
             Container(
               width: 33,
               height: 33,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: paleMint,
                 shape: BoxShape.circle,
               ),
@@ -735,17 +730,17 @@ class _ChatBubble extends StatelessWidget {
                       CrossAxisAlignment.start,
                   children: [
                     if (isSafetyResponse) ...[
-                      Row(
+                      const Row(
                         mainAxisSize:
                             MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.shield_outlined,
                             size: 14,
                             color: darkGreen,
                           ),
-                          const SizedBox(width: 5),
-                          const Text(
+                          SizedBox(width: 5),
+                          Text(
                             'Supportive response',
                             style: TextStyle(
                               fontSize: 9,
@@ -775,14 +770,14 @@ class _ChatBubble extends StatelessWidget {
                     ),
 
                     if (!isSafetyResponse)
-                      Padding(
+                      const Padding(
                         padding:
-                            const EdgeInsets.only(
+                            EdgeInsets.only(
                           top: 7,
                         ),
                         child: Text(
                           'MindSphere AI',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 8,
                             fontWeight:
                                 FontWeight.w600,

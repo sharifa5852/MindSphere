@@ -38,6 +38,10 @@ const assessmentSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    isDemo: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

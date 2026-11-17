@@ -12,8 +12,6 @@ const _paleMint = Color(0xFFD9F0DC);
 const _freshMint = Color(0xFFC9EACB);
 const _calmMint = Color(0xFFB5DFC0);
 const _sageMint = Color(0xFFAED8B8);
-const _eucalyptus = Color(0xFFA8D5B5);
-const _dustyMint = Color(0xFFA5D0B2);
 const _celadon = Color(0xFFB7DCC1);
 const _morningMint = Color(0xFFC8E7D0);
 
@@ -352,7 +350,7 @@ class _WellnessReportsPageState
         boxShadow: [
           BoxShadow(
             color:
-                _darkGreen.withOpacity(0.035),
+                _darkGreen.withValues(alpha: 0.035),
             blurRadius: 14,
             offset: const Offset(0, 5),
           ),
@@ -444,7 +442,7 @@ class _WellnessReportsPageState
         boxShadow: [
           BoxShadow(
             color:
-                _darkGreen.withOpacity(0.07),
+                _darkGreen.withValues(alpha: 0.07),
             blurRadius: 24,
             offset: const Offset(0, 9),
           ),
@@ -460,8 +458,8 @@ class _WellnessReportsPageState
               height: 130,
               decoration: BoxDecoration(
                 color:
-                    Colors.white.withOpacity(
-                  0.17,
+                    Colors.white.withValues(
+                  alpha: 0.17,
                 ),
                 shape: BoxShape.circle,
               ),
@@ -476,8 +474,8 @@ class _WellnessReportsPageState
               height: 85,
               decoration: BoxDecoration(
                 color:
-                    Colors.white.withOpacity(
-                  0.12,
+                    Colors.white.withValues(
+                  alpha: 0.12,
                 ),
                 shape: BoxShape.circle,
               ),
@@ -499,7 +497,7 @@ class _WellnessReportsPageState
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white
-                          .withOpacity(0.58),
+                          .withValues(alpha: 0.58),
                       borderRadius:
                           BorderRadius
                               .circular(20),
@@ -612,7 +610,7 @@ class _WellnessReportsPageState
       ),
       decoration: BoxDecoration(
         color:
-            Colors.white.withOpacity(0.58),
+            Colors.white.withValues(alpha: 0.58),
         borderRadius:
             BorderRadius.circular(15),
       ),
@@ -1309,7 +1307,7 @@ class _WellnessReportsPageState
             height: 35,
             decoration: BoxDecoration(
               color: Colors.white
-                  .withOpacity(0.65),
+                  .withValues(alpha: 0.65),
               borderRadius:
                   BorderRadius.circular(11),
             ),
@@ -1356,7 +1354,7 @@ class _WellnessReportsPageState
         boxShadow: [
           BoxShadow(
             color:
-                _darkGreen.withOpacity(0.035),
+                _darkGreen.withValues(alpha: 0.035),
             blurRadius: 17,
             offset: const Offset(0, 6),
           ),
@@ -1579,7 +1577,7 @@ class _EmptyReport extends StatelessWidget {
           Container(
             width: 70,
             height: 70,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: _paleMint,
               shape: BoxShape.circle,
             ),

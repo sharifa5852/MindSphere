@@ -278,8 +278,7 @@ class MoodResultPage extends StatelessWidget {
         _modeLabel(result.analysisModeUsed);
 
     final reflection =
-        hasEmotionAnalysis &&
-                result.insight != null &&
+        result.insight != null &&
                 result.insight!.trim().isNotEmpty
             ? result.insight!
             : _reflection;
@@ -505,7 +504,7 @@ class MoodResultPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.07),
+            color: darkGreen.withValues(alpha: 0.07),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -521,7 +520,7 @@ class MoodResultPage extends StatelessWidget {
               width: 145,
               height: 145,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.16),
+                color: Colors.white.withValues(alpha: 0.16),
                 shape: BoxShape.circle,
               ),
             ),
@@ -534,7 +533,7 @@ class MoodResultPage extends StatelessWidget {
               width: 90,
               height: 90,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
             ),
@@ -551,7 +550,7 @@ class MoodResultPage extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.58),
+                  color: Colors.white.withValues(alpha: 0.58),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Row(
@@ -584,11 +583,11 @@ class MoodResultPage extends StatelessWidget {
                   width: 92,
                   height: 92,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.55),
+                    color: Colors.white.withValues(alpha: 0.55),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: darkGreen.withOpacity(0.06),
+                        color: darkGreen.withValues(alpha: 0.06),
                         blurRadius: 18,
                         offset: const Offset(0, 7),
                       ),
@@ -642,7 +641,7 @@ class MoodResultPage extends StatelessWidget {
                     vertical: 7,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.42),
+                    color: Colors.white.withValues(alpha: 0.42),
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: const Text(
@@ -683,7 +682,7 @@ class MoodResultPage extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.045),
+            color: darkGreen.withValues(alpha: 0.045),
             blurRadius: 20,
             offset: const Offset(0, 7),
           ),
@@ -1007,7 +1006,7 @@ class MoodResultPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(27),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.055),
+            color: darkGreen.withValues(alpha: 0.055),
             blurRadius: 18,
             offset: const Offset(0, 7),
           ),
@@ -1023,7 +1022,7 @@ class MoodResultPage extends StatelessWidget {
                 width: 43,
                 height: 43,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.58),
+                  color: Colors.white.withValues(alpha: 0.58),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -1082,7 +1081,7 @@ class MoodResultPage extends StatelessWidget {
               vertical: 9,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.45),
+              color: Colors.white.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Row(
@@ -1215,7 +1214,7 @@ class MoodResultPage extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.025),
+            color: darkGreen.withValues(alpha: 0.025),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1249,7 +1248,7 @@ class MoodResultPage extends StatelessWidget {
               Icon(
                 Icons.more_horiz_rounded,
                 size: 16,
-                color: mutedText.withOpacity(0.45),
+                color: mutedText.withValues(alpha: 0.45),
               ),
             ],
           ),
@@ -1364,7 +1363,7 @@ class MoodResultPage extends StatelessWidget {
         vertical: 12,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(17),
         border: Border.all(
           color: paleMint,

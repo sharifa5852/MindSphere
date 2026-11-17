@@ -18,11 +18,6 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
   static const Color primary = Color(0xFFBFE3C0);
   static const Color paleMint = Color(0xFFD9F0DC);
   static const Color freshMint = Color(0xFFC9EACB);
-  static const Color calmMint = Color(0xFFB5DFC0);
-  static const Color sageMint = Color(0xFFAED8B8);
-  static const Color eucalyptus = Color(0xFFA8D5B5);
-  static const Color celadon = Color(0xFFB7DCC1);
-  static const Color morningMint = Color(0xFFC8E7D0);
 
   static const Color background = Color(0xFFF3FAF5);
   static const Color darkGreen = Color(0xFF2D6A4F);
@@ -511,7 +506,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.07),
+            color: darkGreen.withValues(alpha: 0.07),
             blurRadius: 22,
             offset: const Offset(0, 9),
           ),
@@ -526,7 +521,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
               width: 105,
               height: 105,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 shape: BoxShape.circle,
               ),
             ),
@@ -539,7 +534,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
               width: 70,
               height: 70,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
             ),
@@ -554,7 +549,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.55),
+                  color: Colors.white.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -696,7 +691,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
                   boxShadow: [
                     if (selected)
                       BoxShadow(
-                        color: darkGreen.withOpacity(0.07),
+                        color: darkGreen.withValues(alpha: 0.07),
                         blurRadius: 14,
                         offset: const Offset(0, 5),
                       ),
@@ -711,7 +706,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
                       height: 43,
                       decoration: BoxDecoration(
                         color: selected
-                            ? Colors.white.withOpacity(0.65)
+                            ? Colors.white.withValues(alpha: 0.65)
                             : paleMint,
                         borderRadius:
                             BorderRadius.circular(14),
@@ -754,7 +749,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
                         border: Border.all(
                           color: selected
                               ? darkGreen
-                              : mutedText.withOpacity(0.3),
+                              : mutedText.withValues(alpha: 0.3),
                           width: 1.5,
                         ),
                       ),
@@ -808,7 +803,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.035),
+            color: darkGreen.withValues(alpha: 0.035),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -881,7 +876,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
               activeTrackColor: darkGreen,
               inactiveTrackColor: paleMint,
               thumbColor: darkGreen,
-              overlayColor: darkGreen.withOpacity(0.09),
+              overlayColor: darkGreen.withValues(alpha: 0.09),
               thumbShape: const RoundSliderThumbShape(
                 enabledThumbRadius: 9,
               ),
@@ -994,7 +989,7 @@ class _MoodCheckInPageState extends State<MoodCheckInPage> {
                           : Icons.radio_button_off_rounded,
                       color: selected
                           ? darkGreen
-                          : mutedText.withOpacity(0.28),
+                          : mutedText.withValues(alpha: 0.28),
                       size: 23,
                     ),
                   ],
@@ -1149,7 +1144,7 @@ Widget _reflectionField() {
           boxShadow: [
             if (selected)
               BoxShadow(
-                color: darkGreen.withOpacity(0.06),
+                color: darkGreen.withValues(alpha: 0.06),
                 blurRadius: 15,
                 offset: const Offset(0, 5),
               ),
@@ -1164,7 +1159,7 @@ Widget _reflectionField() {
               height: 43,
               decoration: BoxDecoration(
                 color: selected
-                    ? Colors.white.withOpacity(0.6)
+                    ? Colors.white.withValues(alpha: 0.6)
                     : paleMint,
                 borderRadius:
                     BorderRadius.circular(13),
@@ -1212,7 +1207,7 @@ Widget _reflectionField() {
                   : Icons.radio_button_unchecked_rounded,
               color: selected
                   ? darkGreen
-                  : mutedText.withOpacity(0.3),
+                  : mutedText.withValues(alpha: 0.3),
               size: 22,
             ),
           ],
@@ -1234,13 +1229,13 @@ Widget _reflectionField() {
         style: ElevatedButton.styleFrom(
           backgroundColor: darkGreen,
           disabledBackgroundColor:
-              darkGreen.withOpacity(0.55),
+              darkGreen.withValues(alpha: 0.55),
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(19),
           ),
-          shadowColor: darkGreen.withOpacity(0.18),
+          shadowColor: darkGreen.withValues(alpha: 0.18),
         ),
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),

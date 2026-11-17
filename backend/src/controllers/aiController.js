@@ -100,9 +100,11 @@ const chatWithAi = async (req, res) => {
   } catch (error) {
     console.error("AI chat failed:", error.message);
 
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Could not generate an AI response right now.",
+      message: error.statusCode === 503
+        ? error.message
+        : "Could not generate an AI response right now.",
     });
   }
 };
@@ -243,6 +245,7 @@ const getWeeklyInsight = async (req, res) => {
         JournalEntry.countDocuments(dateFilter),
         Assessment.aggregate([
           { $match: dateFilter },
+          { $sort: { date: 1 } },
           {
             $group: {
               _id: "$type",

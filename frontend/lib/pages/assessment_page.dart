@@ -24,12 +24,8 @@ class _AssessmentPageState extends State<AssessmentPage> {
 
   static const Color primary = Color(0xFFBFE3C0);
   static const Color paleMint = Color(0xFFD9F0DC);
-  static const Color freshMint = Color(0xFFC9EACB);
   static const Color calmMint = Color(0xFFB5DFC0);
   static const Color sageMint = Color(0xFFAED8B8);
-  static const Color eucalyptus = Color(0xFFA8D5B5);
-  static const Color dustyMint = Color(0xFFA5D0B2);
-  static const Color celadon = Color(0xFFB7DCC1);
   static const Color morningMint = Color(0xFFC8E7D0);
 
   static const Color background = Color(0xFFF3FAF5);
@@ -267,7 +263,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.07),
+            color: darkGreen.withValues(alpha: 0.07),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -282,7 +278,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
               width: 112,
               height: 112,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.16),
+                color: Colors.white.withValues(alpha: 0.16),
                 shape: BoxShape.circle,
               ),
             ),
@@ -294,7 +290,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
               width: 76,
               height: 76,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.10),
+                color: Colors.white.withValues(alpha: 0.10),
                 shape: BoxShape.circle,
               ),
             ),
@@ -306,7 +302,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
                 width: 54,
                 height: 54,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.68),
+                  color: Colors.white.withValues(alpha: 0.68),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -332,9 +328,9 @@ class _AssessmentPageState extends State<AssessmentPage> {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(
+                    const Text(
                       'Take a breath. There is no perfect answer.',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         height: 1.25,
                         fontWeight: FontWeight.w800,
@@ -503,7 +499,7 @@ class _AssessmentPageState extends State<AssessmentPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(selected ? 0.08 : 0.035),
+            color: darkGreen.withValues(alpha: selected ? 0.08 : 0.035),
             blurRadius: selected ? 16 : 10,
             offset: Offset(0, selected ? 7 : 4),
           ),
