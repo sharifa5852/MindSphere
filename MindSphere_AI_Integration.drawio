@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net" modified="2026-11-18T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="ai-integration" name="AI Integration">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="MindSphere — AI Integration" style="text;html=1;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#1B4332;" vertex="1" parent="1">
+          <mxGeometry x="270" y="30" width="620" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="client" value="Flutter App&#xa;Chat • Mood Check-in • Journal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#66A477;strokeWidth=2;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="300" width="210" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="backend" value="MindSphere Backend&#xa;Node.js / Express&#xa;&#xa;Authentication • AI orchestration&#xa;Crisis keyword check • Fallbacks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#4A86C5;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="380" y="270" width="270" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="gemini" value="Google Gemini API&#xa;&#xa;AI chat responses&#xa;Journal and mood analysis&#xa;Supportive reflections / insights" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#9673A6;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="820" y="130" width="270" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="emotion" value="Emotion Service&#xa;FastAPI + RoBERTa&#xa;&#xa;Optional trained-model path&#xa;Mood / journal emotion labels" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#D79B00;strokeWidth=2;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="820" y="390" width="270" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="db" value="MongoDB&#xa;Mood entries • Journal entries&#xa;Chat history • User data" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#F5F5F5;strokeColor=#666666;strokeWidth=2;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="410" y="570" width="210" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="REST / JSON&#xa;Firebase ID token" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4A86C5;startArrow=block;startFill=1;endArrow=block;endFill=1;fontSize=12;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="client" target="backend">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="Prompts / wellness data&#xa;Generated AI response" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#9673A6;startArrow=block;startFill=1;endArrow=block;endFill=1;fontSize=12;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="backend" target="gemini">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="HTTP text request&#xa;Emotion labels / scores" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#D79B00;startArrow=block;startFill=1;endArrow=block;endFill=1;fontSize=12;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="backend" target="emotion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="Read / write wellness data&#xa;and chat history" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#666666;startArrow=block;startFill=1;endArrow=block;endFill=1;fontSize=12;labelBackgroundColor=#FFFFFF;" edge="1" parent="1" source="backend" target="db">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="Chat safety check runs in the backend. Crisis-keyword matches return a prepared safety response without calling Gemini. Trained-model analysis can fall back to Gemini." style="shape=note;whiteSpace=wrap;html=1;size=15;fillColor=#FFFDE7;strokeColor=#D6B656;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="730" y="590" width="390" height="100" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
