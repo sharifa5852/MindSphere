@@ -17,7 +17,7 @@ MindSphere is a student software engineering project that helps people reflect o
 - [API overview](#api-overview)
 - [AI integration](#ai-integration)
 - [Demo data](#demo-data)
-- [Diagrams and tests](#diagrams-and-tests)
+- [Testing](#testing)
 - [Privacy, safety, and limitations](#privacy-safety-and-limitations)
 
 ## System architecture
@@ -76,8 +76,6 @@ The client sends Firebase-authenticated JSON requests to Express. The backend ve
 │   ├── lib/services/              # Firebase auth and API client
 │   ├── lib/config/                # API base URL selection
 │   └── scripts/run-phone.ps1      # Android phone USB/ADB helper
-├── MindSphere_AI_Integration.drawio
-└── MindSphere_Component_Diagram.drawio
 ```
 
 ## Local installation and quick start
@@ -207,21 +205,25 @@ From `backend/`, after setting the demo environment variables:
 npm run seed:demo
 ```
 
-## Diagrams and tests
+## Testing
 
-- [AI integration diagram](MindSphere_AI_Integration.drawio)
-- [Component diagram](MindSphere_Component_Diagram.drawio)
+The repository currently contains:
 
-Open either `.drawio` file in [diagrams.net](https://app.diagrams.net/) to view or edit it.
+- **Backend unit tests:** Two tests for PHQ-9 and GAD-7 score calculation, severity levels, and support flags (`backend/test/assessmentScoring.test.js`).
+- **Flutter widget test:** Checks that the welcome screen shows login and account-creation actions and builds without a widget exception (`frontend/test/widget_test.dart`).
+- **Emotion-model sample run:** `emotion_service/test_model.py` sends four example sentences through the model and prints predictions. It is a smoke/demo script, not an automated test suite because it has no assertions.
 
-Run the available tests from their project folders:
+Run the automated test suites from their project folders:
 
 ```bash
-cd backend && npm test
-cd ../frontend && flutter test
+cd backend
+npm test
+
+cd ../frontend
+flutter test
 ```
 
-`emotion_service/test_model.py` is a sample inference script that loads the model and prints predictions; it is not a pytest suite.
+There are no API/database integration, full-system, acceptance, load, or security test suites in the repository. Do not describe those as completed unless you performed and recorded them separately.
 
 ## Privacy, safety, and limitations
 
