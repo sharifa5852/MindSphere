@@ -22,7 +22,7 @@ MindSphere is a student software engineering project that helps people reflect o
 
 ## System architecture
 
-This repository contains a Flutter client, a Node.js/Express API, and a separately run Python emotion inference service. The proposal describes additional features that are not implemented here. This README documents the source code as it exists, not every planned proposal feature.
+MindSphere consists of a Flutter client, a Node.js/Express REST API, and an optional Python emotion-inference service. This page describes implemented behavior; proposal-only features are not presented as available features.
 
 ### Component overview
 
@@ -38,17 +38,7 @@ flowchart LR
   Emotion --> Model[RoBERTa GoEmotions model]
 ```
 
-MindSphere uses a client-server architecture with a separate emotion-inference service. The Flutter app obtains Firebase ID tokens and includes them in protected API requests. Express middleware verifies tokens with Firebase Admin. Controllers scope user-owned records using the verified Firebase UID. Mongoose stores and queries MongoDB documents. AI calls are made by the backend; the Flutter app does not receive the Gemini API key.
-
-**Frontend:** Flutter and Dart app for Android, iOS, web, and desktop targets configured by Flutter.
-
-**Backend:** Node.js and Express REST API. Routes, middleware, controllers, services, and Mongoose models are kept in separate modules.
-
-**Database:** MongoDB accessed through Mongoose models.
-
-**Authentication:** Firebase Authentication in the client; Firebase Admin verifies backend ID tokens.
-
-**AI services:** Gemini API for generated wellness responses and analysis. A separate FastAPI service runs RoBERTa emotion classification for the optional trained-model analysis path.
+The client sends Firebase-authenticated JSON requests to Express. The backend verifies tokens, applies application logic, and accesses MongoDB through Mongoose. It calls Gemini for generated wellness content and can call the FastAPI/RoBERTa service for emotion classification. AI credentials remain on the backend.
 
 ## Key features and modules
 
@@ -197,36 +187,7 @@ Use an HTTPS API URL for production builds. Do not put backend credentials or th
 
 ## API overview
 
-Except for health and the temporary emotion test route, the routes below use Firebase Bearer-token authentication. Requests and responses use JSON.
-
-| Method | Path | Purpose |
-|---|---|---|
-| `GET` | `/api/health` | Backend health check |
-| `POST` | `/api/auth/sync` | Create or synchronize a user profile |
-| `GET` | `/api/auth/me` | Read current user's profile |
-| `PUT` | `/api/auth/me` | Update profile/preferences |
-| `POST` | `/api/moods` | Create mood check-in |
-| `GET` | `/api/moods` | List mood entries |
-| `GET` | `/api/moods/weekly` | Get weekly mood summary |
-| `POST` | `/api/moods/:id/analyze` | Analyze a saved mood entry |
-| `POST` | `/api/journals` | Create journal entry |
-| `GET` | `/api/journals` | List journal entries |
-| `GET` | `/api/journals/:id` | Read one owned journal entry |
-| `DELETE` | `/api/journals/:id` | Delete one owned journal entry |
-| `GET` | `/api/assessments` | List PHQ-9/GAD-7 assessment definitions |
-| `POST` | `/api/assessments/submit` | Score and save an assessment |
-| `GET` | `/api/assessments/history` | Read assessment history |
-| `POST` | `/api/ai/chat` | Get an AI companion response |
-| `POST` | `/api/ai/journal-analysis` | Analyze a saved journal entry |
-| `GET` | `/api/ai/weekly-insight` | Generate a weekly AI wellness insight |
-| `GET` | `/api/reports/weekly` | Get aggregated weekly report |
-| `GET` | `/api/reports/monthly` | Get aggregated current-month report |
-| `GET` | `/api/therapists` | List active therapists; supports filters |
-| `GET` | `/api/therapists/recommended` | Get ranked recommendations |
-| `GET` | `/api/therapists/:id` | Read active therapist details |
-| `GET` | `/api/test-emotion?text=...` | Temporary backend emotion-service diagnostic route |
-
-The Python emotion service exposes `GET /health` and `POST /predict-emotion` with a JSON body containing `text`.
+The Express API serves JSON under `/api`. The main route groups are `/auth`, `/moods`, `/journals`, `/ai`, `/assessments`, `/reports`, and `/therapists`. Protected routes require a Firebase ID token in the Bearer authorization header. `GET /api/health` is available for checking the backend. The Python service exposes `GET /health` and `POST /predict-emotion`.
 
 ## AI integration
 
@@ -238,7 +199,7 @@ The Python emotion service exposes `GET /health` and `POST /predict-emotion` wit
 
 ## Demo data
 
-The optional `seed:demo` script creates demo mood entries, journal entries, assessments, and fictional therapist profiles for one existing Firebase account. It verifies the Firebase UID and can optionally check the email. Review `backend/src/scripts/seedDemoData.js` before running it against any database. The script marks mood, journal, and assessment documents with an `isDemo` field, but those fields are not declared in the current Mongoose schemas. Since Mongoose schemas are strict by default, do not assume those records will be reliably recognized and replaced on a later run. Therapist demo records are identified by `seedSource`.
+The optional `seed:demo` script creates sample mood entries, journal entries, assessments, and fictional therapist profiles for an existing Firebase account. It verifies the Firebase UID and can optionally check the email. Review `backend/src/scripts/seedDemoData.js` before running it against a database: the script uses `isDemo` markers for wellness records, but those fields are not declared in their Mongoose schemas, so repeated runs may not identify prior records reliably. Therapist demo profiles use a `seedSource` marker.
 
 From `backend/`, after setting the demo environment variables:
 
@@ -269,8 +230,6 @@ cd ../frontend && flutter test
 - Chat and journal text, and mood notes submitted for AI analysis, are sent from the backend to the configured AI provider. Avoid using real sensitive personal information in demonstrations and use demo data where possible.
 - Therapist seed/demo profiles are fictional and should not be represented as real providers.
 
-- There is no implemented admin dashboard/role system, appointment booking, therapist account, real-time video consultation, hospital integration, notifications scheduler, habits module, meditation library, or Cloudinary integration.
-- Only PHQ-9 and GAD-7 are implemented; the proposed stress assessment is not present.
-- Therapist recommendations use application scoring rules and available profile fields; there is no review-text analysis or Gemini-based therapist matcher.
-- No production deployment/hosting configuration is included in this repository.
-- The Python requirements file is empty; dependencies are currently described in the setup section above rather than pinned in that file.
+- The proposal's admin panel, stress assessment, notifications, meditation, video consultation, and review analysis are not implemented. Only PHQ-9 and GAD-7 screenings are available.
+- Therapist recommendations use application scoring rules; they do not analyze review text or use Gemini.
+- No production deployment configuration is included. The Python requirements file is empty, so emotion-service dependencies are not pinned.
