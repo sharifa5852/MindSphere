@@ -3,6 +3,8 @@ param(
     [string]$DeviceId,
     [ValidateRange(1, 65535)]
     [int]$Port = 5000,
+    [string]$ApiBaseUrl,
+    [switch]$Public,
     [switch]$NoResident
 )
 
@@ -41,19 +43,36 @@ if (-not $DeviceId) {
     $DeviceId = $phones[0]
 }
 
-$apiBaseUrl = "http://127.0.0.1:$Port/api"
+if ($Public -and $ApiBaseUrl) { throw 'Use either -Public or -ApiBaseUrl, not both.' }
+if ($Public) {
+    $ApiBaseUrl = & (Join-Path $PSScriptRoot 'start-public-api.ps1') -Port $Port
+}
+$useLocalBackend = [string]::IsNullOrWhiteSpace($ApiBaseUrl)
+if ($useLocalBackend) {
+    $ApiBaseUrl = "http://127.0.0.1:$Port/api"
+} else {
+    $parsedUrl = $null
+    if (-not [Uri]::TryCreate($ApiBaseUrl.Trim(), [UriKind]::Absolute, [ref]$parsedUrl) -or
+        $parsedUrl.Scheme -ne 'https' -or $parsedUrl.UserInfo -or $parsedUrl.Query -or $parsedUrl.Fragment) {
+        throw 'The public API address must be an absolute HTTPS URL without credentials, a query, or a fragment.'
+    }
+    $ApiBaseUrl = $parsedUrl.AbsoluteUri.TrimEnd('/')
+    if (-not $ApiBaseUrl.EndsWith('/api')) { $ApiBaseUrl += '/api' }
+}
 try {
-    $health = Invoke-RestMethod -Uri "$apiBaseUrl/health" -TimeoutSec 10
+    $health = Invoke-RestMethod -Uri "$ApiBaseUrl/health" -TimeoutSec 15
     if ($health.success -ne $true) { throw 'The API health check did not succeed.' }
 } catch {
-    throw "MindSphere backend is not healthy at $apiBaseUrl. Start it with npm.cmd start in the backend directory, then try again. $($_.Exception.Message)"
+    throw "MindSphere backend is not healthy at $ApiBaseUrl. Check that the backend and internet connection are available. $($_.Exception.Message)"
 }
 
 # Forward the phone's loopback port to this computer, avoiding LAN/firewall issues.
-& $adb -s $DeviceId reverse "tcp:$Port" "tcp:$Port"
-if ($LASTEXITCODE -ne 0) { throw 'Could not forward the backend port to the phone.' }
+if ($useLocalBackend) {
+    & $adb -s $DeviceId reverse "tcp:$Port" "tcp:$Port"
+    if ($LASTEXITCODE -ne 0) { throw 'Could not forward the backend port to the phone.' }
+}
 
-Write-Host "Running MindSphere on $DeviceId with API $apiBaseUrl"
+Write-Host "Running MindSphere on $DeviceId with API $ApiBaseUrl"
 Push-Location -LiteralPath $frontendDirectory
 try {
     $abi = (& $adb -s $DeviceId shell getprop ro.product.cpu.abi | Out-String).Trim()
@@ -64,7 +83,7 @@ try {
         'x86_64' { 'android-x64' }
         default { throw "Unsupported phone architecture: $abi" }
     }
-    & $flutter build apk --debug "--target-platform=$platform" "--dart-define=API_BASE_URL=$apiBaseUrl"
+    & $flutter build apk --debug "--target-platform=$platform" "--dart-define=API_BASE_URL=$ApiBaseUrl"
     if ($LASTEXITCODE -ne 0) { throw 'The Android build failed.' }
 
     # Install updates explicitly: a rejected install must never trigger an

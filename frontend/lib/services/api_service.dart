@@ -9,6 +9,8 @@ import '../config/api_config.dart';
 class ApiService {
   static final String baseUrl = ApiConfig.baseUrl;
   static const _aiTimeout = Duration(seconds: 60);
+  static String? _profileUserId;
+  static Future<Map<String, dynamic>>? _profileRequest;
 
   static Future<Map<String, String>> _getHeaders() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -17,7 +19,8 @@ class ApiService {
       throw Exception('No authenticated Firebase user found.');
     }
 
-    final idToken = await user.getIdToken();
+    final idToken =
+        await user.getIdToken().timeout(const Duration(seconds: 20));
 
     if (idToken == null || idToken.isEmpty) {
       throw Exception('Could not obtain Firebase ID token.');
@@ -30,14 +33,15 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> syncUser({
-    required String name,
+    String? name,
   }) async {
     final headers = await _getHeaders();
 
     final response = await _post(
       '$baseUrl/auth/sync',
       headers,
-      {'name': name},
+      {if (name != null && name.trim().isNotEmpty) 'name': name.trim()},
+      timeout: const Duration(seconds: 10),
     );
 
     final responseBody = response.body.isNotEmpty
@@ -53,7 +57,31 @@ class ApiService {
     );
   }
 
+  // Reuse an in-flight/successful sync per account, and retry after a failure.
+  static Future<Map<String, dynamic>> ensureProfile({String? name}) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Future.error(Exception('No authenticated Firebase user found.'));
+    }
+    if (_profileUserId == user.uid && _profileRequest != null) {
+      return _profileRequest!;
+    }
+    late final Future<Map<String, dynamic>> request;
+    request =
+        syncUser(name: name ?? user.displayName).catchError((Object error) {
+      if (identical(_profileRequest, request)) {
+        _profileRequest = null;
+        _profileUserId = null;
+      }
+      throw error;
+    });
+    _profileUserId = user.uid;
+    _profileRequest = request;
+    return request;
+  }
+
   static Future<Map<String, dynamic>> getCurrentUser() async {
+    await ensureProfile();
     final headers = await _getHeaders();
     final response = await _get('$baseUrl/auth/me', headers);
     return _readResponse(response, successCodes: const [200]);

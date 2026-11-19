@@ -19,60 +19,6 @@ Strict safety rules:
 - Do not answer unrelated questions as if they are mental-wellness advice.
 `;
 
-// Generate a safe chat reply using the recent conversation as context.
-const generateWellnessResponse = async (message, history = []) => {
-  // Rebuild correct user/model message order.
-  const orderedContents = [];
-
-  history.forEach((item) => {
-    orderedContents.push({
-      role: "user",
-      parts: [{ text: item.message }],
-    });
-
-    orderedContents.push({
-      role: "model",
-      parts: [{ text: item.response }],
-    });
-  });
-
-  orderedContents.push({
-    role: "user",
-    parts: [{ text: message }],
-  });
-
-  const response = await generateContentWithFallback({
-    contents: orderedContents,
-    config: {
-      systemInstruction: wellnessSystemInstruction,
-      temperature: 0.5,
-      maxOutputTokens: 350,
-      safetySettings: [
-        {
-          category: "HARM_CATEGORY_HARASSMENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_HATE_SPEECH",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-      ],
-    },
-  });
-
-  const text = response.text?.trim();
-
-  if (!text) {
-    return "I'm sorry, I couldn't prepare a response right now. Please try again in a moment.";
-  }
-
-  return text;
-};
-
 // Ask Gemini for structured, non-diagnostic journal analysis.
 const analyzeJournalEntry = async (journalText) => {
   const response = await generateContentWithFallback({
@@ -270,7 +216,6 @@ Return plain text only. Do not diagnose. Write naturally, do not just repeat the
   return text;
 };
 module.exports = {
-  generateWellnessResponse,
   analyzeJournalEntry,
   generateWeeklyInsight,
   analyzeMoodCheckIn,

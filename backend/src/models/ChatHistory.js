@@ -27,6 +27,11 @@ const chatHistorySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    responseType: {
+      type: String,
+      enum: ["wellbeing", "app_help", "greeting", "follow_up", "off_topic", "medical_boundary", "crisis", "fallback"],
+      default: null,
+    },
     timestamp: {
       type: Date,
       default: Date.now,

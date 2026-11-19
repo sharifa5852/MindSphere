@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'email_verification_page.dart';
 import 'package:flutter/material.dart';
 
@@ -98,26 +100,26 @@ class _SignupPageState extends State<SignupPage> {
       }
 
       debugPrint('Firebase signup successful');
-      debugPrint('Firebase UID: ${user.uid}');
-      debugPrint('Firebase email: ${user.email}');
+      try {
+        await user.updateDisplayName(name).timeout(const Duration(seconds: 10));
+      } catch (_) {
+        debugPrint('Display-name update can be retried from the profile.');
+      }
 
-      await user.updateDisplayName(name);
-     
-         // Send the verification email now, right after the account is created.
-      await user.sendEmailVerification();
+      unawaited(ApiService.ensureProfile(name: name).then<void>(
+        (_) => debugPrint('User synchronized with backend.'),
+        onError: (Object error) => debugPrint(
+          'Profile sync pending: ${ApiService.readableError(error)}',
+        ),
+      ));
 
-      if (!mounted) return;
-      showMessage('Saving your profile...');
-
-      await ApiService.syncUser(name: name);
-
-      debugPrint('User synchronized with backend.');
-
-      if (!mounted) return;
-
-      showMessage('Account created — check your email to verify ✓');
-
-      await Future.delayed(const Duration(milliseconds: 700));
+      try {
+        await user.sendEmailVerification().timeout(const Duration(seconds: 15));
+      } catch (_) {
+        // The account already exists; sending mail can be retried separately.
+        debugPrint(
+            'Verification email pending; use Resend on the next screen.');
+      }
 
       if (!mounted) return;
 
@@ -159,7 +161,8 @@ class _SignupPageState extends State<SignupPage> {
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      labelStyle: const TextStyle(color: _mutedOnLight, fontWeight: FontWeight.w600),
+      labelStyle:
+          const TextStyle(color: _mutedOnLight, fontWeight: FontWeight.w600),
       hintStyle: const TextStyle(color: _mutedOnLight),
       prefixIcon: Icon(icon, color: _greenDark, size: 21),
       suffixIcon: suffixIcon,
@@ -194,7 +197,8 @@ class _SignupPageState extends State<SignupPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(24, isCompactHeight ? 6 : 12, 24, 28),
+              padding:
+                  EdgeInsets.fromLTRB(24, isCompactHeight ? 6 : 12, 24, 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -236,7 +240,8 @@ class _SignupPageState extends State<SignupPage> {
                         ],
                       ),
                       child: Center(
-                        child: Text('🌿', style: TextStyle(fontSize: 30 * scale)),
+                        child:
+                            Text('🌿', style: TextStyle(fontSize: 30 * scale)),
                       ),
                     ),
                   ),
@@ -347,7 +352,8 @@ class _SignupPageState extends State<SignupPage> {
                             icon: Icons.lock_outline_rounded,
                             suffixIcon: IconButton(
                               onPressed: () {
-                                setState(() => hideConfirmPassword = !hideConfirmPassword);
+                                setState(() =>
+                                    hideConfirmPassword = !hideConfirmPassword);
                               },
                               icon: Icon(
                                 hideConfirmPassword
@@ -378,7 +384,8 @@ class _SignupPageState extends State<SignupPage> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 onChanged: (value) {
-                                  setState(() => agreeToPrivacy = value ?? false);
+                                  setState(
+                                      () => agreeToPrivacy = value ?? false);
                                 },
                               ),
                               Expanded(
@@ -437,7 +444,9 @@ class _SignupPageState extends State<SignupPage> {
                                       height: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.4,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
                                       ),
                                     )
                                   : Text(
@@ -461,7 +470,8 @@ class _SignupPageState extends State<SignupPage> {
                     children: [
                       Text(
                         'Already have an account? ',
-                        style: TextStyle(color: _mutedOnLight, fontSize: 13 * scale),
+                        style: TextStyle(
+                            color: _mutedOnLight, fontSize: 13 * scale),
                       ),
                       TextButton(
                         style: TextButton.styleFrom(

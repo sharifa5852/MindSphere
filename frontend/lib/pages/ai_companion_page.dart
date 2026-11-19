@@ -36,7 +36,9 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
   final List<Map<String, dynamic>> _messages = [
     {
       'sender': 'ai',
-      'message': 'Hi! How are you feeling today?',
+      'message': 'Hi! I\'m your MindSphere wellbeing companion. We can talk about '
+          'feelings, stress, sleep, and coping. I can draw on your recent mood '
+          'check-ins to make suggestions more personal. How are you feeling today?',
       'isSafetyResponse': false,
     },
   ];
@@ -372,7 +374,7 @@ class _AiCompanionPageState extends State<AiCompanionPage> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Share what is on your mind. I’m listening.',
+                        'Support for feelings, stress, sleep, and coping.',
                         style: TextStyle(
                           fontSize: 11,
                           height: 1.35,

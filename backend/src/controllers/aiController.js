@@ -6,11 +6,12 @@ const MoodEntry = require("../models/MoodEntry");
 const Assessment = require("../models/Assessment");
 
 const {
-  generateWellnessResponse,
   analyzeJournalEntry,
   generateWeeklyInsight,
   generateJournalReflectionForEmotion,
 } = require("../services/geminiService");
+const companionService = require("../services/companionService");
+const companionContext = require("../services/companionContext");
 
 const { detectEmotions } = require("../services/emotionService");
 
@@ -63,25 +64,35 @@ const chatWithAi = async (req, res) => {
 
     const userMessage = message.trim();
     const detectedEmotion = detectEmotion(userMessage);
-    const isSafetyResponse = hasCrisisLanguage(userMessage);
-
+    let isSafetyResponse = hasCrisisLanguage(userMessage);
+    let responseType = "crisis";
     let aiResponse;
 
     if (isSafetyResponse) {
       aiResponse = getCrisisResponse();
     } else {
-      const recentHistory = await ChatHistory.find({
-        userId: req.firebaseUser.uid,
-      })
-        .sort({ timestamp: -1 })
-        .limit(6)
-        .select("message response -_id")
-        .lean();
+      const [recentHistory, context] = await Promise.all([
+        ChatHistory.find({
+          userId: req.firebaseUser.uid,
+          responseType: { $in: companionService.RESPONSE_TYPES.filter((type) =>
+            !["off_topic", "fallback"].includes(type)) },
+          timestamp: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+        })
+          .sort({ timestamp: -1 })
+          .limit(6)
+          .select("message response responseType -_id")
+          .lean(),
+        companionContext.loadCompanionContext(req.firebaseUser.uid),
+      ]);
 
-      aiResponse = await generateWellnessResponse(
+      const reply = await companionService.generateCompanionReply(
         userMessage,
-        recentHistory.reverse()
+        recentHistory.reverse(),
+        context
       );
+      aiResponse = reply.response;
+      responseType = reply.responseType;
+      isSafetyResponse = reply.isSafetyResponse;
     }
 
     const chatHistory = await ChatHistory.create({
@@ -90,6 +101,7 @@ const chatWithAi = async (req, res) => {
       response: aiResponse,
       detectedEmotion,
       isSafetyResponse,
+      responseType,
     });
 
     return res.status(200).json({
@@ -97,6 +109,7 @@ const chatWithAi = async (req, res) => {
       response: aiResponse,
       detectedEmotion,
       isSafetyResponse,
+      responseType,
       chatId: chatHistory._id,
     });
   } catch (error) {

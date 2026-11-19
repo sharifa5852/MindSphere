@@ -57,8 +57,9 @@ startServer();
 // temp
 
 const { detectEmotions } = require("./src/services/emotionService");
+const authenticateUser = require("./src/middleware/authMiddleware");
 
-app.get("/api/test-emotion", async (req, res) => {
+app.get("/api/test-emotion", authenticateUser, async (req, res) => {
   const text = req.query.text;
   if (!text) {
     return res.status(400).json({ success: false, message: "Provide ?text=... in the URL." });
