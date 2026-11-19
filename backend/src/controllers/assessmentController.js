@@ -4,6 +4,7 @@ const {
   calculateAssessmentResult,
 } = require("../utils/assessmentScoring");
 
+// Return the available PHQ-9 and GAD-7 definitions and answer options.
 const getAssessmentTypes = (req, res) => {
   const assessments = Object.entries(assessmentTypes).map(([id, details]) => ({
     id,
@@ -24,6 +25,7 @@ const getAssessmentTypes = (req, res) => {
   });
 };
 
+// Validate answers, calculate the screening result, and save it for this user.
 const submitAssessment = async (req, res) => {
   try {
     const { type, answers, date } = req.body;
@@ -107,6 +109,7 @@ const submitAssessment = async (req, res) => {
   }
 };
 
+// Return this user's assessment history without exposing submitted answers.
 const getAssessmentHistory = async (req, res) => {
   try {
     const assessments = await Assessment.find({

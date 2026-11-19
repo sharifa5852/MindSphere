@@ -34,6 +34,7 @@ const NEGATIVE_LABELS = new Set([
   "embarrassment", "fear", "grief", "nervousness", "remorse", "sadness",
 ]);
 
+// Map a detected emotion label to the app's positive/negative/neutral categories.
 const inferSentiment = (emotionLabel) => {
   const value = (emotionLabel || "").toLowerCase();
   if (POSITIVE_LABELS.has(value)) return "positive";
@@ -41,6 +42,7 @@ const inferSentiment = (emotionLabel) => {
   return "neutral";
 };
 
+// Handle a chat message, applying the safety check before calling Gemini.
 const chatWithAi = async (req, res) => {
   try {
     const { message } = req.body;
@@ -109,6 +111,7 @@ const chatWithAi = async (req, res) => {
   }
 };
 
+// Analyze an owned journal entry and persist its reflection and emotion fields.
 const analyzeJournal = async (req, res) => {
   try {
     const { journalId, mode } = req.body;
@@ -215,6 +218,7 @@ const analyzeJournal = async (req, res) => {
   }
 };
 
+// Aggregate recent wellness data and request a separate Gemini weekly insight.
 const getWeeklyInsight = async (req, res) => {
   try {
     const endDate = new Date();

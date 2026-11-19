@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Open the MongoDB connection and stop startup if it cannot be established.
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);

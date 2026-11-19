@@ -117,6 +117,7 @@
 
 const User = require("../models/User");
 
+// Create or refresh the MongoDB profile using the verified Firebase identity.
 const syncUser = async (req, res) => {
   try {
     // authMiddleware already verified the Firebase ID token before this
@@ -192,6 +193,7 @@ const syncUser = async (req, res) => {
   }
 };
 
+// Return the authenticated user's profile and preferences.
 const getCurrentUser = async (req, res) => {
   try {
     // authMiddleware already verified the Firebase ID token.
@@ -227,6 +229,7 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
+// Validate and save profile or preference changes for the authenticated user.
 const updateProfile = async (req, res) => {
   try {
     // authMiddleware already verified the Firebase ID token.

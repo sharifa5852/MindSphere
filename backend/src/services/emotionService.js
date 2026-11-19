@@ -3,6 +3,7 @@ const EMOTION_SERVICE_URL =
 
 const TIMEOUT_MS = 15000; // 15 seconds — RoBERTa inference isn't instant
 
+// Call FastAPI for emotion labels and scores, enforcing a bounded request time.
 const detectEmotions = async (text) => {
   if (typeof text !== "string" || !text.trim()) {
     throw new Error("Text is required for emotion detection.");

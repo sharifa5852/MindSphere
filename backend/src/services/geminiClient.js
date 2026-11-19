@@ -3,6 +3,7 @@ const { setTimeout: pause } = require("node:timers/promises");
 const REQUEST_TIMEOUT_MS = 12000;
 const TRANSIENT_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504]);
 
+// Create the Google GenAI client from the server-side API key.
 const getGeminiClient = async () => {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is missing from the .env file.");
@@ -18,6 +19,7 @@ const getGeminiClient = async () => {
   });
 };
 
+// Choose a supported thinking setting for the selected Gemini model family.
 function thinkingConfigFor(model) {
   if (/gemini-2\.5-flash/.test(model)) return { thinkingBudget: 0 };
   if (/gemini-(3\.5-flash(?:-lite)?|3\.6-flash|3\.1-flash-lite|3-flash-preview)$/.test(model)) {
@@ -26,6 +28,7 @@ function thinkingConfigFor(model) {
   return { thinkingLevel: "LOW" };
 }
 
+// Generate content with bounded retries and a fallback model; injectable for tests.
 function createContentGenerator({ getClient = getGeminiClient, wait = pause } = {}) {
   return async ({ contents, config = {} }) => {
     const client = await getClient();

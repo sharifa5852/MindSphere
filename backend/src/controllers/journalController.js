@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const JournalEntry = require("../models/JournalEntry");
 
+// Validate and save a journal entry for the authenticated user.
 const createJournalEntry = async (req, res) => {
   try {
     const { text, date } = req.body;
@@ -47,6 +48,7 @@ const createJournalEntry = async (req, res) => {
   }
 };
 
+// List the authenticated user's journal entries, newest first.
 const getJournalEntries = async (req, res) => {
   try {
     const journalEntries = await JournalEntry.find({
@@ -70,6 +72,7 @@ const getJournalEntries = async (req, res) => {
   }
 };
 
+// Return a journal entry only when it belongs to the authenticated user.
 const getJournalEntryById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -107,6 +110,7 @@ const getJournalEntryById = async (req, res) => {
   }
 };
 
+// Delete an owned journal entry after validating its MongoDB ID.
 const deleteJournalEntry = async (req, res) => {
   try {
     const { id } = req.params;

@@ -25,6 +25,7 @@ const FALLBACK_ANALYSIS = {
     "Your check-in was saved. An emotion reflection is unavailable right now. Please try again later.",
 };
 
+// Validate and save a mood check-in under the verified Firebase UID.
 const createMoodEntry = async (req, res) => {
   try {
     const { mood, stress, energy, sleep, socialConnection, note, date } = req.body;
@@ -73,6 +74,7 @@ const createMoodEntry = async (req, res) => {
   }
 };
 
+// Analyze an owned mood entry with Gemini or the optional emotion model.
 const analyzeMoodEntry = async (req, res) => {
   try {
     const { id } = req.params;
@@ -169,6 +171,7 @@ const analyzeMoodEntry = async (req, res) => {
   }
 };
 
+// List only the authenticated user's mood check-ins.
 const getMoodEntries = async (req, res) => {
   try {
     const moodEntries = await MoodEntry.find({ userId: req.firebaseUser.uid }).sort({ date: -1 });
@@ -179,6 +182,7 @@ const getMoodEntries = async (req, res) => {
   }
 };
 
+// Aggregate the user's recent mood check-ins into weekly averages.
 const getWeeklyMoodSummary = async (req, res) => {
   try {
     const startOfWeek = new Date();

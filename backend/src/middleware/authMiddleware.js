@@ -1,5 +1,6 @@
 const firebaseAuth = require("../config/firebaseAdmin");
 
+// Verify the Firebase Bearer token and attach its identity to the request.
 const authenticateUser = async (req, res, next) => {
   try {
     const authorizationHeader = req.headers.authorization;

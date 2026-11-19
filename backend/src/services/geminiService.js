@@ -19,6 +19,7 @@ Strict safety rules:
 - Do not answer unrelated questions as if they are mental-wellness advice.
 `;
 
+// Generate a safe chat reply using the recent conversation as context.
 const generateWellnessResponse = async (message, history = []) => {
   // Rebuild correct user/model message order.
   const orderedContents = [];
@@ -72,6 +73,7 @@ const generateWellnessResponse = async (message, history = []) => {
   return text;
 };
 
+// Ask Gemini for structured, non-diagnostic journal analysis.
 const analyzeJournalEntry = async (journalText) => {
   const response = await generateContentWithFallback({
     contents: `
@@ -128,6 +130,7 @@ Return JSON only. Do not diagnose. Keep the reflection supportive and under 100 
   return JSON.parse(text);
 };
 
+// Turn aggregated weekly data into a brief general wellness reflection.
 const generateWeeklyInsight = async (wellnessData) => {
   const response = await generateContentWithFallback({
     contents: `
@@ -154,6 +157,7 @@ Keep it under 120 words.
 
   return text;
 };
+// Generate structured emotion and insight fields from a mood check-in.
 const analyzeMoodCheckIn = async (moodData) => {
   const { mood, stress, energy, sleep, socialConnection, note } = moodData;
 
@@ -207,6 +211,7 @@ Return JSON only. Do not diagnose. Identify the single most likely everyday emot
 
   return JSON.parse(text);
 };
+// Ask Gemini for a short insight grounded in the classifier's emotion label.
 const generateInsightForDetectedEmotion = async (moodData, emotionLabel) => {
   const { mood, stress, energy, sleep, socialConnection, note } = moodData;
 
@@ -236,6 +241,7 @@ Write a short, warm, supportive insight (1-2 sentences, under 40 words) that ack
   }
   return text;
 };
+// Ask Gemini to reflect supportively on a journal entry and detected emotion.
 const generateJournalReflectionForEmotion = async (journalText, emotionLabel) => {
   const response = await generateContentWithFallback({
     contents: `
