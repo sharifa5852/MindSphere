@@ -1,16 +1,4 @@
-const getGeminiClient = async () => {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is missing from the .env file.");
-  }
-
-  const { GoogleGenAI } = await import("@google/genai");
-
-  return new GoogleGenAI({
-    apiKey: process.env.GEMINI_API_KEY,
-  });
-};
-
-const modelName = () => process.env.GEMINI_MODEL || "gemini-3.5-flash";
+const { generateContentWithFallback } = require("./geminiClient");
 
 const wellnessSystemInstruction = `
 You are MindSphere AI, a calm and supportive mental-wellness companion.
@@ -31,74 +19,9 @@ Strict safety rules:
 - Do not answer unrelated questions as if they are mental-wellness advice.
 `;
 
-const generateWellnessResponse = async (message, history = []) => {
-  const ai = await getGeminiClient();
-
-
-
-  // Rebuild correct user/model message order.
-  const orderedContents = [];
-
-  history.forEach((item) => {
-    orderedContents.push({
-      role: "user",
-      parts: [{ text: item.message }],
-    });
-
-    orderedContents.push({
-      role: "model",
-      parts: [{ text: item.response }],
-    });
-  });
-
-  orderedContents.push({
-    role: "user",
-    parts: [{ text: message }],
-  });
-
-  const response = await ai.models.generateContent({
-    model: modelName(),
-    contents: orderedContents,
-    config: {
-      systemInstruction: wellnessSystemInstruction,
-      temperature: 0.5,
-      maxOutputTokens: 350,
-      // Keep conversational replies short and reserve the output budget for
-      // the user-visible answer instead of internal reasoning tokens.
-      thinkingConfig: {
-        thinkingBudget: 0,
-      },
-      safetySettings: [
-        {
-          category: "HARM_CATEGORY_HARASSMENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_HATE_SPEECH",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        {
-          category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE",
-        },
-      ],
-    },
-  });
-
-  const text = response.text?.trim();
-
-  if (!text) {
-    return "I'm sorry, I couldn't prepare a response right now. Please try again in a moment.";
-  }
-
-  return text;
-};
-
+// Ask Gemini for structured, non-diagnostic journal analysis.
 const analyzeJournalEntry = async (journalText) => {
-  const ai = await getGeminiClient();
-
-  const response = await ai.models.generateContent({
-    model: modelName(),
+  const response = await generateContentWithFallback({
     contents: `
 Analyze this private journal entry only as a general wellness reflection.
 
@@ -112,6 +35,7 @@ ${wellnessSystemInstruction}
 Return JSON only. Do not diagnose. Keep the reflection supportive and under 100 words.
 `,
       responseMimeType: "application/json",
+      maxOutputTokens: 1024,
       responseSchema: {
         type: "object",
         properties: {
@@ -152,11 +76,9 @@ Return JSON only. Do not diagnose. Keep the reflection supportive and under 100 
   return JSON.parse(text);
 };
 
+// Turn aggregated weekly data into a brief general wellness reflection.
 const generateWeeklyInsight = async (wellnessData) => {
-  const ai = await getGeminiClient();
-
-  const response = await ai.models.generateContent({
-    model: modelName(),
+  const response = await generateContentWithFallback({
     contents: `
 Write a short, warm weekly wellness reflection based only on this aggregated data:
 
@@ -181,13 +103,11 @@ Keep it under 120 words.
 
   return text;
 };
+// Generate structured emotion and insight fields from a mood check-in.
 const analyzeMoodCheckIn = async (moodData) => {
-  const ai = await getGeminiClient();
-
   const { mood, stress, energy, sleep, socialConnection, note } = moodData;
 
-  const response = await ai.models.generateContent({
-    model: modelName(),
+  const response = await generateContentWithFallback({
     contents: `
 Analyze this mood check-in as a general wellness reflection.
 
@@ -205,6 +125,7 @@ ${wellnessSystemInstruction}
 Return JSON only. Do not diagnose. Identify the single most likely everyday emotion word (e.g. "Calm", "Nervousness", "Sadness", "Content", "Overwhelmed"), a confidence between 0 and 1, up to 3 other plausible emotions with lower scores between 0 and 1, and a short one or two sentence supportive insight under 40 words.
 `,
       responseMimeType: "application/json",
+      maxOutputTokens: 1024,
       responseSchema: {
         type: "object",
         properties: {
@@ -236,12 +157,11 @@ Return JSON only. Do not diagnose. Identify the single most likely everyday emot
 
   return JSON.parse(text);
 };
+// Ask Gemini for a short insight grounded in the classifier's emotion label.
 const generateInsightForDetectedEmotion = async (moodData, emotionLabel) => {
-  const ai = await getGeminiClient();
   const { mood, stress, energy, sleep, socialConnection, note } = moodData;
 
-  const response = await ai.models.generateContent({
-    model: modelName(),
+  const response = await generateContentWithFallback({
     contents: `
 A trained emotion-detection model analyzed the user's reflection and detected the primary emotion: "${emotionLabel}".
 
@@ -258,7 +178,6 @@ Write a short, warm, supportive insight (1-2 sentences, under 40 words) that ack
       systemInstruction: `${wellnessSystemInstruction}\n\nReturn plain text only. Do not diagnose. Write naturally, do not just repeat the emotion label mechanically.`,
       temperature: 0.5,
       maxOutputTokens: 150,
-      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
@@ -268,11 +187,9 @@ Write a short, warm, supportive insight (1-2 sentences, under 40 words) that ack
   }
   return text;
 };
+// Ask Gemini to reflect supportively on a journal entry and detected emotion.
 const generateJournalReflectionForEmotion = async (journalText, emotionLabel) => {
-  const ai = await getGeminiClient();
-
-  const response = await ai.models.generateContent({
-    model: modelName(),
+  const response = await generateContentWithFallback({
     contents: `
 A trained emotion-detection model analyzed this private journal entry and detected the primary emotion: "${emotionLabel}".
 
@@ -289,7 +206,6 @@ Return plain text only. Do not diagnose. Write naturally, do not just repeat the
 `,
       temperature: 0.5,
       maxOutputTokens: 150,
-      thinkingConfig: { thinkingBudget: 0 },
     },
   });
 
@@ -300,7 +216,6 @@ Return plain text only. Do not diagnose. Write naturally, do not just repeat the
   return text;
 };
 module.exports = {
-  generateWellnessResponse,
   analyzeJournalEntry,
   generateWeeklyInsight,
   analyzeMoodCheckIn,

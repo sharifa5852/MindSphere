@@ -6,11 +6,12 @@ const MoodEntry = require("../models/MoodEntry");
 const Assessment = require("../models/Assessment");
 
 const {
-  generateWellnessResponse,
   analyzeJournalEntry,
   generateWeeklyInsight,
   generateJournalReflectionForEmotion,
 } = require("../services/geminiService");
+const companionService = require("../services/companionService");
+const companionContext = require("../services/companionContext");
 
 const { detectEmotions } = require("../services/emotionService");
 
@@ -34,6 +35,7 @@ const NEGATIVE_LABELS = new Set([
   "embarrassment", "fear", "grief", "nervousness", "remorse", "sadness",
 ]);
 
+// Map a detected emotion label to the app's positive/negative/neutral categories.
 const inferSentiment = (emotionLabel) => {
   const value = (emotionLabel || "").toLowerCase();
   if (POSITIVE_LABELS.has(value)) return "positive";
@@ -41,6 +43,7 @@ const inferSentiment = (emotionLabel) => {
   return "neutral";
 };
 
+// Handle a chat message, applying the safety check before calling Gemini.
 const chatWithAi = async (req, res) => {
   try {
     const { message } = req.body;
@@ -61,25 +64,35 @@ const chatWithAi = async (req, res) => {
 
     const userMessage = message.trim();
     const detectedEmotion = detectEmotion(userMessage);
-    const isSafetyResponse = hasCrisisLanguage(userMessage);
-
+    let isSafetyResponse = hasCrisisLanguage(userMessage);
+    let responseType = "crisis";
     let aiResponse;
 
     if (isSafetyResponse) {
       aiResponse = getCrisisResponse();
     } else {
-      const recentHistory = await ChatHistory.find({
-        userId: req.firebaseUser.uid,
-      })
-        .sort({ timestamp: -1 })
-        .limit(6)
-        .select("message response -_id")
-        .lean();
+      const [recentHistory, context] = await Promise.all([
+        ChatHistory.find({
+          userId: req.firebaseUser.uid,
+          responseType: { $in: companionService.RESPONSE_TYPES.filter((type) =>
+            !["off_topic", "fallback"].includes(type)) },
+          timestamp: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+        })
+          .sort({ timestamp: -1 })
+          .limit(6)
+          .select("message response responseType -_id")
+          .lean(),
+        companionContext.loadCompanionContext(req.firebaseUser.uid),
+      ]);
 
-      aiResponse = await generateWellnessResponse(
+      const reply = await companionService.generateCompanionReply(
         userMessage,
-        recentHistory.reverse()
+        recentHistory.reverse(),
+        context
       );
+      aiResponse = reply.response;
+      responseType = reply.responseType;
+      isSafetyResponse = reply.isSafetyResponse;
     }
 
     const chatHistory = await ChatHistory.create({
@@ -88,6 +101,7 @@ const chatWithAi = async (req, res) => {
       response: aiResponse,
       detectedEmotion,
       isSafetyResponse,
+      responseType,
     });
 
     return res.status(200).json({
@@ -95,18 +109,22 @@ const chatWithAi = async (req, res) => {
       response: aiResponse,
       detectedEmotion,
       isSafetyResponse,
+      responseType,
       chatId: chatHistory._id,
     });
   } catch (error) {
     console.error("AI chat failed:", error.message);
 
-    return res.status(500).json({
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Could not generate an AI response right now.",
+      message: error.statusCode === 503
+        ? error.message
+        : "Could not generate an AI response right now.",
     });
   }
 };
 
+// Analyze an owned journal entry and persist its reflection and emotion fields.
 const analyzeJournal = async (req, res) => {
   try {
     const { journalId, mode } = req.body;
@@ -213,6 +231,7 @@ const analyzeJournal = async (req, res) => {
   }
 };
 
+// Aggregate recent wellness data and request a separate Gemini weekly insight.
 const getWeeklyInsight = async (req, res) => {
   try {
     const endDate = new Date();
@@ -243,6 +262,7 @@ const getWeeklyInsight = async (req, res) => {
         JournalEntry.countDocuments(dateFilter),
         Assessment.aggregate([
           { $match: dateFilter },
+          { $sort: { date: 1 } },
           {
             $group: {
               _id: "$type",

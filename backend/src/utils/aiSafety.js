@@ -10,6 +10,7 @@ const crisisKeywords = [
   "self-harm",
 ];
 
+// Check text for the configured crisis phrases used by chat and journal flows.
 const hasCrisisLanguage = (text) => {
   const normalizedText = text.toLowerCase();
 
@@ -18,9 +19,11 @@ const hasCrisisLanguage = (text) => {
   );
 };
 
+// Return the fixed supportive response used when a crisis phrase is matched.
 const getCrisisResponse = () =>
   "I'm really sorry you're going through this. You deserve immediate support. Please contact someone you trust, a qualified mental-health professional, or a local crisis/emergency service now. If you may be in immediate danger, call your local emergency number right away. I cannot provide emergency care, but you do not have to handle this alone.";
 
+// Apply simple keyword rules to label a chat message's broad emotion.
 const detectEmotion = (text) => {
   const normalizedText = text.toLowerCase();
 

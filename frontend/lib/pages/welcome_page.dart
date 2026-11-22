@@ -123,7 +123,7 @@ class _WelcomePageState extends State<WelcomePage>
             right: -50,
             child: _glow(
               180,
-              paleMint.withOpacity(0.75),
+              paleMint.withValues(alpha: 0.75),
             ),
           ),
 
@@ -132,7 +132,7 @@ class _WelcomePageState extends State<WelcomePage>
             left: -80,
             child: _glow(
               160,
-              morningMint.withOpacity(0.75),
+              morningMint.withValues(alpha: 0.75),
             ),
           ),
 
@@ -191,7 +191,7 @@ class _WelcomePageState extends State<WelcomePage>
 
                               boxShadow: [
                                 BoxShadow(
-                                  color: eucalyptusMint.withOpacity(0.35),
+                                  color: eucalyptusMint.withValues(alpha: 0.35),
                                   blurRadius: 28,
                                   offset: const Offset(0, 12),
                                 ),
@@ -266,7 +266,7 @@ class _WelcomePageState extends State<WelcomePage>
                             style: TextStyle(
                               fontSize: 14,
                               height: 1.5,
-                              color: forestText.withOpacity(0.78),
+                              color: forestText.withValues(alpha: 0.78),
                             ),
                           ),
                         ],
@@ -429,7 +429,7 @@ class _WelcomePageState extends State<WelcomePage>
 
                                   boxShadow: [
                                     BoxShadow(
-                                      color: eucalyptusMint.withOpacity(0.30),
+                                      color: eucalyptusMint.withValues(alpha: 0.30),
                                       blurRadius: 22,
                                       offset: const Offset(0, 10),
                                     ),
@@ -545,7 +545,7 @@ class _WelcomePageState extends State<WelcomePage>
                             // FOOTER
                             // =================================================
 
-                            Text(
+                            const Text(
                               'Your wellbeing journey starts with one small step 🌱',
 
                               textAlign: TextAlign.center,
@@ -674,7 +674,7 @@ class FeatureItem extends StatelessWidget {
               Text(
                 description,
 
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12.5,
                   height: 1.45,
                   color: mutedOnLight,

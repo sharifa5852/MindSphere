@@ -19,10 +19,6 @@ class _InsightsPageState extends State<InsightsPage> {
   static const Color primary = Color(0xFFBFE3C0);
   static const Color paleMint = Color(0xFFD9F0DC);
   static const Color freshMint = Color(0xFFC9EACB);
-  static const Color calmMint = Color(0xFFB5DFC0);
-  static const Color sageMint = Color(0xFFAED8B8);
-  static const Color eucalyptus = Color(0xFFA8D5B5);
-  static const Color dustyMint = Color(0xFFA5D0B2);
   static const Color celadon = Color(0xFFB7DCC1);
   static const Color morningMint = Color(0xFFC8E7D0);
 
@@ -240,7 +236,7 @@ class _InsightsPageState extends State<InsightsPage> {
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
-              onTap: () => Navigator.pop(context),
+              onTap: () => Navigator.maybePop(context),
               child: const Padding(
                 padding: EdgeInsets.all(10),
                 child: Icon(
@@ -336,7 +332,7 @@ class _InsightsPageState extends State<InsightsPage> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.07),
+            color: darkGreen.withValues(alpha: 0.07),
             blurRadius: 24,
             offset: const Offset(0, 9),
           ),
@@ -351,7 +347,7 @@ class _InsightsPageState extends State<InsightsPage> {
               width: 125,
               height: 125,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.17),
+                color: Colors.white.withValues(alpha: 0.17),
                 shape: BoxShape.circle,
               ),
             ),
@@ -364,7 +360,7 @@ class _InsightsPageState extends State<InsightsPage> {
               width: 85,
               height: 85,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
             ),
@@ -382,7 +378,7 @@ class _InsightsPageState extends State<InsightsPage> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.58),
+                      color: Colors.white.withValues(alpha: 0.58),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
@@ -450,7 +446,7 @@ class _InsightsPageState extends State<InsightsPage> {
                     height: 58,
                     decoration: BoxDecoration(
                       color:
-                          Colors.white.withOpacity(0.58),
+                          Colors.white.withValues(alpha: 0.58),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -535,7 +531,7 @@ class _InsightsPageState extends State<InsightsPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.045),
+            color: darkGreen.withValues(alpha: 0.045),
             blurRadius: 18,
             offset: const Offset(0, 7),
           ),
@@ -733,7 +729,7 @@ class _InsightsPageState extends State<InsightsPage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.035),
+            color: darkGreen.withValues(alpha: 0.035),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
@@ -820,7 +816,7 @@ class _InsightsPageState extends State<InsightsPage> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: primary.withOpacity(0.28),
+              color: primary.withValues(alpha: 0.28),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -877,7 +873,7 @@ class _InsightsPageState extends State<InsightsPage> {
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.045),
+            color: darkGreen.withValues(alpha: 0.045),
             blurRadius: 17,
             offset: const Offset(0, 7),
           ),
@@ -893,7 +889,7 @@ class _InsightsPageState extends State<InsightsPage> {
                 width: 41,
                 height: 41,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.58),
+                  color: Colors.white.withValues(alpha: 0.58),
                   borderRadius:
                       BorderRadius.circular(14),
                 ),
@@ -1029,7 +1025,7 @@ class _InsightsPageState extends State<InsightsPage> {
               Container(
                 width: 34,
                 height: 34,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: freshMint,
                   shape: BoxShape.circle,
                 ),
@@ -1054,7 +1050,7 @@ class _InsightsPageState extends State<InsightsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.65),
+        color: Colors.white.withValues(alpha: 0.65),
         borderRadius: BorderRadius.circular(19),
         border: Border.all(
           color: paleMint,
@@ -1097,7 +1093,7 @@ class _InsightsPageState extends State<InsightsPage> {
           Container(
             width: 64,
             height: 64,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: paleMint,
               shape: BoxShape.circle,
             ),
@@ -1282,7 +1278,6 @@ class MoodChartPainter extends CustomPainter {
     if (points.isEmpty) return;
 
     const darkGreen = Color(0xFF2D6A4F);
-    const primary = Color(0xFFBFE3C0);
     const paleMint = Color(0xFFD9F0DC);
     const mutedText = Color(0xFF5B7568);
 
@@ -1378,7 +1373,7 @@ class MoodChartPainter extends CustomPainter {
     // Mood scale labels
     // ----------------------------------------------------------
 
-    final textStyle = const TextStyle(
+    const textStyle = TextStyle(
       fontSize: 8,
       fontWeight: FontWeight.w600,
       color: mutedText,

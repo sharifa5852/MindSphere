@@ -1,12 +1,19 @@
+import 'package:flutter/foundation.dart';
+
 class ApiConfig {
   ApiConfig._();
 
-  /// Set when building/running the app. Example:
-  /// flutter run --dart-define=API_BASE_URL=http://192.168.1.20:5000/api
-  /// Default local address for the connected development phone.
-  /// Update it if your computer receives a different Wi-Fi IPv4 address.
-  static const String baseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://192.168.0.139:5000/api',
-  );
+  static const String _configuredBaseUrl =
+      String.fromEnvironment('API_BASE_URL');
+
+  // Android emulators reach the host computer through 10.0.2.2. Other local
+  // targets (web, Windows, macOS, iOS simulator) can use localhost.
+  // Physical phones: scripts/run-phone.ps1 forwards the backend over adb and
+  // supplies API_BASE_URL. For Wi-Fi without adb, supply the computer's LAN URL.
+  static String get baseUrl {
+    if (_configuredBaseUrl.isNotEmpty) return _configuredBaseUrl;
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+        ? 'http://10.0.2.2:5000/api'
+        : 'http://localhost:5000/api';
+  }
 }

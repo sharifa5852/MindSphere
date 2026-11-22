@@ -7,7 +7,10 @@ import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 
 class ApiService {
-  static const String baseUrl = ApiConfig.baseUrl;
+  static final String baseUrl = ApiConfig.baseUrl;
+  static const _aiTimeout = Duration(seconds: 60);
+  static String? _profileUserId;
+  static Future<Map<String, dynamic>>? _profileRequest;
 
   static Future<Map<String, String>> _getHeaders() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -16,7 +19,8 @@ class ApiService {
       throw Exception('No authenticated Firebase user found.');
     }
 
-    final idToken = await user.getIdToken();
+    final idToken =
+        await user.getIdToken().timeout(const Duration(seconds: 20));
 
     if (idToken == null || idToken.isEmpty) {
       throw Exception('Could not obtain Firebase ID token.');
@@ -29,14 +33,15 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> syncUser({
-    required String name,
+    String? name,
   }) async {
     final headers = await _getHeaders();
 
     final response = await _post(
       '$baseUrl/auth/sync',
       headers,
-      {'name': name},
+      {if (name != null && name.trim().isNotEmpty) 'name': name.trim()},
+      timeout: const Duration(seconds: 10),
     );
 
     final responseBody = response.body.isNotEmpty
@@ -51,7 +56,32 @@ class ApiService {
       responseBody['message'] ?? 'Failed to synchronize user with backend.',
     );
   }
-    static Future<Map<String, dynamic>> getCurrentUser() async {
+
+  // Reuse an in-flight/successful sync per account, and retry after a failure.
+  static Future<Map<String, dynamic>> ensureProfile({String? name}) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Future.error(Exception('No authenticated Firebase user found.'));
+    }
+    if (_profileUserId == user.uid && _profileRequest != null) {
+      return _profileRequest!;
+    }
+    late final Future<Map<String, dynamic>> request;
+    request =
+        syncUser(name: name ?? user.displayName).catchError((Object error) {
+      if (identical(_profileRequest, request)) {
+        _profileRequest = null;
+        _profileUserId = null;
+      }
+      throw error;
+    });
+    _profileUserId = user.uid;
+    _profileRequest = request;
+    return request;
+  }
+
+  static Future<Map<String, dynamic>> getCurrentUser() async {
+    await ensureProfile();
     final headers = await _getHeaders();
     final response = await _get('$baseUrl/auth/me', headers);
     return _readResponse(response, successCodes: const [200]);
@@ -74,7 +104,7 @@ class ApiService {
     final response = await _put('$baseUrl/auth/me', headers, body);
     return _readResponse(response, successCodes: const [200]);
   }
- 
+
   static Future<Map<String, dynamic>> createMoodEntry({
     required int mood,
     required int stress,
@@ -85,12 +115,12 @@ class ApiService {
   }) async {
     final headers = await _getHeaders();
     final response = await _post('$baseUrl/moods', headers, {
-        'mood': mood,
-        'stress': stress,
-        'energy': energy,
-        'sleep': sleep,
-        'socialConnection': socialConnection,
-        if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+      'mood': mood,
+      'stress': stress,
+      'energy': energy,
+      'sleep': sleep,
+      'socialConnection': socialConnection,
+      if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
     });
 
     final responseBody = response.body.isNotEmpty
@@ -104,11 +134,15 @@ class ApiService {
     throw Exception(responseBody['message'] ?? 'Failed to save mood check-in.');
   }
 
-  static Future<Map<String, dynamic>> analyzeMoodEntry(String moodEntryId, {String mode = 'gemini'}) async {
+  static Future<Map<String, dynamic>> analyzeMoodEntry(String moodEntryId,
+      {String mode = 'gemini'}) async {
     final headers = await _getHeaders();
-    final response = await _post('$baseUrl/moods/$moodEntryId/analyze', headers, {'mode': mode});
+    final response = await _post(
+        '$baseUrl/moods/$moodEntryId/analyze', headers, {'mode': mode},
+        timeout: _aiTimeout);
     return _readResponse(response, successCodes: const [200]);
   }
+
   static Future<Map<String, dynamic>> getWeeklyMoodSummary() async {
     final headers = await _getHeaders();
     final response = await _get('$baseUrl/moods/weekly', headers);
@@ -120,24 +154,32 @@ class ApiService {
     final response = await _get('$baseUrl/journals', headers);
     final body = _readResponse(response, successCodes: const [200]);
     final entries = body['journalEntries'] as List<dynamic>? ?? const [];
-    return entries.map((entry) => Map<String, dynamic>.from(entry as Map)).toList();
+    return entries
+        .map((entry) => Map<String, dynamic>.from(entry as Map))
+        .toList();
   }
 
   static Future<Map<String, dynamic>> createJournalEntry(String text) async {
     final headers = await _getHeaders();
-    final response = await _post('$baseUrl/journals', headers, {'text': text.trim()});
+    final response =
+        await _post('$baseUrl/journals', headers, {'text': text.trim()});
     return _readResponse(response, successCodes: const [201]);
   }
 
-  static Future<Map<String, dynamic>> analyzeJournalEntry(String journalId, {String mode = 'gemini'}) async {
+  static Future<Map<String, dynamic>> analyzeJournalEntry(String journalId,
+      {String mode = 'gemini'}) async {
     final headers = await _getHeaders();
-    final response = await _post('$baseUrl/ai/journal-analysis', headers, {'journalId': journalId, 'mode': mode});
+    final response = await _post('$baseUrl/ai/journal-analysis', headers,
+        {'journalId': journalId, 'mode': mode},
+        timeout: _aiTimeout);
     return _readResponse(response, successCodes: const [200]);
   }
 
   static Future<Map<String, dynamic>> chatWithAi(String message) async {
     final headers = await _getHeaders();
-    final response = await _post('$baseUrl/ai/chat', headers, {'message': message.trim()});
+    final response = await _post(
+        '$baseUrl/ai/chat', headers, {'message': message.trim()},
+        timeout: _aiTimeout);
     return _readResponse(response, successCodes: const [200]);
   }
 
@@ -146,7 +188,8 @@ class ApiService {
     required List<int> answers,
   }) async {
     final headers = await _getHeaders();
-    final response = await _post('$baseUrl/assessments/submit', headers, {'type': type, 'answers': answers});
+    final response = await _post('$baseUrl/assessments/submit', headers,
+        {'type': type, 'answers': answers});
     return _readResponse(response, successCodes: const [201]);
   }
 
@@ -164,7 +207,8 @@ class ApiService {
     final headers = await _getHeaders();
     final response = await _get('$baseUrl/therapists/recommended', headers);
     final body = _readResponse(response, successCodes: const [200]);
-    final recommendations = body['recommendations'] as List<dynamic>? ?? const [];
+    final recommendations =
+        body['recommendations'] as List<dynamic>? ?? const [];
     return recommendations
         .map((item) => Map<String, dynamic>.from(item as Map))
         .toList();
@@ -184,8 +228,11 @@ class ApiService {
       return 'The request took too long. Check your connection and try again.';
     }
     final message = error.toString().replaceFirst('Exception: ', '');
-    if (message.contains('SocketException') || message.contains('Connection refused')) {
-      return 'Unable to reach MindSphere. Check your internet connection and that the backend is running.';
+    if (message.contains('SocketException') ||
+        message.contains('Connection refused') ||
+        message.contains('No route to host')) {
+      return 'Unable to reach the MindSphere server at ${ApiConfig.baseUrl}. '
+          'Check your connection and make sure the backend is running.';
     }
     return message;
   }
@@ -193,25 +240,29 @@ class ApiService {
   static Future<http.Response> _get(
     String url,
     Map<String, String> headers,
-  ) => http
-      .get(Uri.parse(url), headers: headers)
-      .timeout(const Duration(seconds: 20));
+  ) =>
+      http
+          .get(Uri.parse(url), headers: headers)
+          .timeout(const Duration(seconds: 20));
 
   static Future<http.Response> _post(
     String url,
     Map<String, String> headers,
-    Map<String, dynamic> body,
-  ) => http
-      .post(Uri.parse(url), headers: headers, body: jsonEncode(body))
-      .timeout(const Duration(seconds: 20));
-  
+    Map<String, dynamic> body, {
+    Duration timeout = const Duration(seconds: 20),
+  }) =>
+      http
+          .post(Uri.parse(url), headers: headers, body: jsonEncode(body))
+          .timeout(timeout);
+
   static Future<http.Response> _put(
     String url,
     Map<String, String> headers,
     Map<String, dynamic> body,
-  ) => http
-      .put(Uri.parse(url), headers: headers, body: jsonEncode(body))
-      .timeout(const Duration(seconds: 20));
+  ) =>
+      http
+          .put(Uri.parse(url), headers: headers, body: jsonEncode(body))
+          .timeout(const Duration(seconds: 20));
 
   static Map<String, dynamic> _readResponse(
     http.Response response, {

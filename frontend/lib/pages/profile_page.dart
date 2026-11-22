@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -68,6 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final response = await ApiService.getCurrentUser();
+      if (!mounted) return;
 
       final user = Map<String, dynamic>.from(
         response['user'] as Map,
@@ -84,19 +84,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
         email = (user['email'] as String?) ?? email;
 
-        notificationsEnabled =
-            preferences['notificationsEnabled'] as bool? ??
-                notificationsEnabled;
+        notificationsEnabled = preferences['notificationsEnabled'] as bool? ??
+            notificationsEnabled;
 
-        checkInTime =
-            (preferences['checkInTime'] as String?) ?? checkInTime;
+        checkInTime = (preferences['checkInTime'] as String?) ?? checkInTime;
 
-        theme =
-            (preferences['theme'] as String?) ?? theme;
+        theme = (preferences['theme'] as String?) ?? theme;
 
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         isLoading = false;
         loadError = ApiService.readableError(e);
@@ -208,8 +206,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       await ApiService.updateProfile(name: result);
 
-      await FirebaseAuth.instance.currentUser
-          ?.updateDisplayName(result);
+      await FirebaseAuth.instance.currentUser?.updateDisplayName(result);
 
       _showSnack('Name updated.');
     } catch (e) {
@@ -258,39 +255,39 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _editTheme() async {
     final result = await showDialog<String>(
       context: context,
-      builder: (context) => SimpleDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        title: const Text(
-          'Appearance',
-          style: TextStyle(
-            color: _forestText,
-            fontWeight: FontWeight.w800,
+      builder: (context) => RadioGroup<String>(
+        groupValue: theme,
+        onChanged: (value) => Navigator.pop(context, value),
+        child: SimpleDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
           ),
-        ),
-        children: ['system', 'light', 'dark'].map((value) {
-          return RadioListTile<String>(
-            value: value,
-            groupValue: theme,
-            activeColor: _darkGreen,
-            title: Text(
-              _themeLabel(value),
-              style: const TextStyle(
-                color: _forestText,
-                fontWeight: FontWeight.w600,
-              ),
+          title: const Text(
+            'Appearance',
+            style: TextStyle(
+              color: _forestText,
+              fontWeight: FontWeight.w800,
             ),
-            onChanged: (v) {
-              Navigator.pop(context, v);
-            },
-          );
-        }).toList(),
+          ),
+          children: ['system', 'light', 'dark'].map((value) {
+            return RadioListTile<String>(
+              value: value,
+              activeColor: _darkGreen,
+              title: Text(
+                _themeLabel(value),
+                style: const TextStyle(
+                  color: _forestText,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
       ),
     );
 
-    if (result == null || result == theme) {
+    if (!mounted || result == null || result == theme) {
       return;
     }
 
@@ -339,8 +336,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (picked == null) return;
 
-    final formatted =
-        '${picked.hour.toString().padLeft(2, '0')}:'
+    final formatted = '${picked.hour.toString().padLeft(2, '0')}:'
         '${picked.minute.toString().padLeft(2, '0')}';
 
     if (formatted == checkInTime) {
@@ -378,7 +374,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _background,
-
       body: SafeArea(
         child: isLoading
             ? const Center(
@@ -400,65 +395,41 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   children: [
                     _topBar(),
-
                     const SizedBox(height: 18),
-
                     if (loadError != null) ...[
                       _offlineBanner(),
                       const SizedBox(height: 16),
                     ],
-
                     _profileHero(),
-
                     const SizedBox(height: 26),
-
                     _sectionHeader(
                       eyebrow: 'PERSONALIZE',
                       title: 'Your preferences',
-                      subtitle:
-                          'Make MindSphere feel a little more like you.',
+                      subtitle: 'Make MindSphere feel a little more like you.',
                     ),
-
                     const SizedBox(height: 12),
-
                     _preferenceCard(),
-
                     const SizedBox(height: 26),
-
                     _sectionHeader(
                       eyebrow: 'YOUR SPACE',
                       title: 'Privacy & data',
-                      subtitle:
-                          'Your reflections should always feel personal.',
+                      subtitle: 'Your reflections should always feel personal.',
                     ),
-
                     const SizedBox(height: 12),
-
                     _privacyCard(),
-
                     const SizedBox(height: 26),
-
                     _sectionHeader(
                       eyebrow: 'CARE & SUPPORT',
                       title: 'Support',
-                      subtitle:
-                          'Helpful resources whenever you need them.',
+                      subtitle: 'Helpful resources whenever you need them.',
                     ),
-
                     const SizedBox(height: 12),
-
                     _supportCard(),
-
                     const SizedBox(height: 26),
-
                     _wellnessNote(),
-
                     const SizedBox(height: 22),
-
                     _logoutButton(),
-
                     const SizedBox(height: 8),
-
                     const Center(
                       child: Text(
                         'MindSphere • a calmer space for you',
@@ -489,7 +460,7 @@ class _ProfilePageState extends State<ProfilePage> {
           elevation: 0,
           child: InkWell(
             customBorder: const CircleBorder(),
-            onTap: () => Navigator.pop(context),
+            onTap: () => Navigator.maybePop(context),
             child: const Padding(
               padding: EdgeInsets.all(10),
               child: Icon(
@@ -500,9 +471,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-
         const SizedBox(width: 12),
-
         const Expanded(
           child: Text(
             'Profile',
@@ -514,7 +483,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ),
-
         Container(
           padding: const EdgeInsets.symmetric(
             horizontal: 11,
@@ -567,7 +535,7 @@ class _ProfilePageState extends State<ProfilePage> {
             width: 34,
             height: 34,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(11),
             ),
             child: const Icon(
@@ -576,9 +544,7 @@ class _ProfilePageState extends State<ProfilePage> {
               color: _darkGreen,
             ),
           ),
-
           const SizedBox(width: 10),
-
           const Expanded(
             child: Text(
               'Showing saved information — the server could not be reached.',
@@ -589,7 +555,6 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-
           TextButton(
             onPressed: _loadProfile,
             style: TextButton.styleFrom(
@@ -630,7 +595,7 @@ class _ProfilePageState extends State<ProfilePage> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: _darkGreen.withOpacity(0.07),
+            color: _darkGreen.withValues(alpha: 0.07),
             blurRadius: 24,
             offset: const Offset(0, 9),
           ),
@@ -645,12 +610,11 @@ class _ProfilePageState extends State<ProfilePage> {
               width: 125,
               height: 125,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.17),
+                color: Colors.white.withValues(alpha: 0.17),
                 shape: BoxShape.circle,
               ),
             ),
           ),
-
           Positioned(
             right: 45,
             bottom: -46,
@@ -658,12 +622,11 @@ class _ProfilePageState extends State<ProfilePage> {
               width: 88,
               height: 88,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
             ),
           ),
-
           Column(
             children: [
               Row(
@@ -673,10 +636,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     width: 74,
                     height: 74,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.72),
+                      color: Colors.white.withValues(alpha: 0.72),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.65),
+                        color: Colors.white.withValues(alpha: 0.65),
                         width: 2,
                       ),
                     ),
@@ -689,9 +652,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 15),
-
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -702,7 +663,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.6),
+                            color: Colors.white.withValues(alpha: 0.6),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text(
@@ -715,9 +676,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 8),
-
                         Text(
                           name,
                           maxLines: 2,
@@ -730,9 +689,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             letterSpacing: -0.4,
                           ),
                         ),
-
                         const SizedBox(height: 5),
-
                         Text(
                           email.isEmpty
                               ? 'Your personal wellness space'
@@ -749,23 +706,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 19),
-
               Row(
                 children: [
                   Expanded(
                     child: _profileMiniCard(
                       icon: Icons.notifications_none_rounded,
                       label: 'Reminders',
-                      value: notificationsEnabled
-                          ? 'On'
-                          : 'Off',
+                      value: notificationsEnabled ? 'On' : 'Off',
                     ),
                   ),
-
                   const SizedBox(width: 9),
-
                   Expanded(
                     child: _profileMiniCard(
                       icon: Icons.schedule_rounded,
@@ -773,9 +724,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       value: _formattedCheckInTime(),
                     ),
                   ),
-
                   const SizedBox(width: 9),
-
                   Expanded(
                     child: _profileMiniCard(
                       icon: Icons.brightness_6_outlined,
@@ -785,9 +734,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
-
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -836,10 +783,10 @@ class _ProfilePageState extends State<ProfilePage> {
         vertical: 10,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.57),
+        color: Colors.white.withValues(alpha: 0.57),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.52),
+          color: Colors.white.withValues(alpha: 0.52),
         ),
       ),
       child: Column(
@@ -849,9 +796,7 @@ class _ProfilePageState extends State<ProfilePage> {
             size: 17,
             color: _darkGreen,
           ),
-
           const SizedBox(height: 5),
-
           Text(
             label,
             style: const TextStyle(
@@ -859,9 +804,7 @@ class _ProfilePageState extends State<ProfilePage> {
               color: _mutedText,
             ),
           ),
-
           const SizedBox(height: 2),
-
           Text(
             value,
             maxLines: 1,
@@ -882,9 +825,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final time = TimeOfDay(
       hour: int.tryParse(parts[0]) ?? 20,
-      minute:
-          int.tryParse(parts.length > 1 ? parts[1] : '0') ??
-              0,
+      minute: int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0,
     );
 
     return time.format(context);
@@ -911,9 +852,7 @@ class _ProfilePageState extends State<ProfilePage> {
             color: _darkGreen,
           ),
         ),
-
         const SizedBox(height: 5),
-
         Text(
           title,
           style: const TextStyle(
@@ -923,9 +862,7 @@ class _ProfilePageState extends State<ProfilePage> {
             letterSpacing: -0.3,
           ),
         ),
-
         const SizedBox(height: 3),
-
         Text(
           subtitle,
           style: const TextStyle(
@@ -952,16 +889,14 @@ class _ProfilePageState extends State<ProfilePage> {
           subtitle: 'Gentle reminders for your check-ins',
           trailing: Switch(
             value: notificationsEnabled,
-            activeColor: _darkGreen,
+            activeThumbColor: _darkGreen,
             activeTrackColor: _calmMint,
             inactiveThumbColor: _mutedText,
             inactiveTrackColor: _paleMint,
             onChanged: _toggleNotifications,
           ),
         ),
-
         _divider(),
-
         _settingTile(
           icon: Icons.palette_outlined,
           iconBackground: _freshMint,
@@ -972,9 +907,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           onTap: _editTheme,
         ),
-
         _divider(),
-
         _settingTile(
           icon: Icons.schedule_rounded,
           iconBackground: _morningMint,
@@ -993,36 +926,34 @@ class _ProfilePageState extends State<ProfilePage> {
   // PRIVACY
   // ============================================================
 
-Widget _privacyCard() {
-  return _groupCard(
-    children: [
-      _settingTile(
-        icon: Icons.lock_outline_rounded,
-        iconBackground: _calmMint,
-        title: 'Privacy settings',
-        subtitle: 'Manage how your information is handled',
-        onTap: () {},
-      ),
-
-      _divider(),
-
-      _settingTile(
-        icon: Icons.menu_book_outlined,
-        iconBackground: _celadon,
-        title: 'Data & journal',
-        subtitle: 'Your reflections and personal entries',
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const JournalPage(),
-            ),
-          );
-        },
-      ),
-    ],
-  );
-}
+  Widget _privacyCard() {
+    return _groupCard(
+      children: [
+        _settingTile(
+          icon: Icons.lock_outline_rounded,
+          iconBackground: _calmMint,
+          title: 'Privacy settings',
+          subtitle: 'Manage how your information is handled',
+          onTap: () {},
+        ),
+        _divider(),
+        _settingTile(
+          icon: Icons.menu_book_outlined,
+          iconBackground: _celadon,
+          title: 'Data & journal',
+          subtitle: 'Your reflections and personal entries',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const JournalPage(),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
 
   // ============================================================
   // SUPPORT
@@ -1040,15 +971,12 @@ Widget _privacyCard() {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    const ProfessionalSupportPage(),
+                builder: (_) => const ProfessionalSupportPage(),
               ),
             );
           },
         ),
-
         _divider(),
-
         _settingTile(
           icon: Icons.insights_rounded,
           iconBackground: _eucalyptus,
@@ -1058,8 +986,7 @@ Widget _privacyCard() {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) =>
-                    const WellnessReportsPage(),
+                builder: (_) => const WellnessReportsPage(),
               ),
             );
           },
@@ -1084,7 +1011,7 @@ Widget _privacyCard() {
         ),
         boxShadow: [
           BoxShadow(
-            color: _darkGreen.withOpacity(0.035),
+            color: _darkGreen.withValues(alpha: 0.035),
             blurRadius: 18,
             offset: const Offset(0, 7),
           ),
@@ -1137,9 +1064,7 @@ Widget _privacyCard() {
                   color: _darkGreen,
                 ),
               ),
-
               const SizedBox(width: 13),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1152,9 +1077,7 @@ Widget _privacyCard() {
                         color: _forestText,
                       ),
                     ),
-
                     const SizedBox(height: 3),
-
                     Text(
                       subtitle,
                       maxLines: 2,
@@ -1168,9 +1091,7 @@ Widget _privacyCard() {
                   ],
                 ),
               ),
-
               const SizedBox(width: 8),
-
               trailing ??
                   const Icon(
                     Icons.chevron_right_rounded,
@@ -1196,7 +1117,7 @@ Widget _privacyCard() {
       child: Divider(
         height: 1,
         thickness: 1,
-        color: _paleMint.withOpacity(0.8),
+        color: _paleMint.withValues(alpha: 0.8),
       ),
     );
   }
@@ -1254,7 +1175,7 @@ Widget _privacyCard() {
             width: 39,
             height: 39,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(13),
             ),
             child: const Center(
@@ -1266,9 +1187,7 @@ Widget _privacyCard() {
               ),
             ),
           ),
-
           const SizedBox(width: 12),
-
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1281,9 +1200,7 @@ Widget _privacyCard() {
                     color: _forestText,
                   ),
                 ),
-
                 SizedBox(height: 4),
-
                 Text(
                   'There is no perfect way to feel. '
                   'MindSphere is simply here to help you notice, reflect, and understand yourself a little better.',
@@ -1313,7 +1230,7 @@ Widget _privacyCard() {
         onPressed: () async {
           await AuthService().logout();
 
-          if (!context.mounted) return;
+          if (!mounted) return;
 
           Navigator.of(context).popUntil(
             (route) => route.isFirst,
@@ -1332,7 +1249,7 @@ Widget _privacyCard() {
         ),
         style: OutlinedButton.styleFrom(
           foregroundColor: _darkGreen,
-          side: BorderSide(
+          side: const BorderSide(
             color: _celadon,
           ),
           backgroundColor: Colors.white,
@@ -1344,4 +1261,3 @@ Widget _privacyCard() {
     );
   }
 }
-

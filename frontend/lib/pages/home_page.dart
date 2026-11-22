@@ -27,8 +27,6 @@ class _HomePageState extends State<HomePage> {
   static const Color paleMint = Color(0xFFD9F0DC);
   static const Color freshMint = Color(0xFFC9EACB);
   static const Color calmMint = Color(0xFFB5DFC0);
-  static const Color sageMint = Color(0xFFAED8B8);
-  static const Color eucalyptus = Color(0xFFA8D5B5);
   static const Color celadon = Color(0xFFB7DCC1);
   static const Color morningMint = Color(0xFFC8E7D0);
 
@@ -266,10 +264,10 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: Colors.white.withOpacity(0.7)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.06),
+            color: darkGreen.withValues(alpha: 0.06),
             blurRadius: 22,
             offset: const Offset(0, 10),
           ),
@@ -285,7 +283,7 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.58),
+                    color: Colors.white.withValues(alpha: 0.58),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -332,7 +330,7 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(width: 12),
           Material(
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
@@ -385,7 +383,7 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.08),
+            color: darkGreen.withValues(alpha: 0.08),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -405,7 +403,7 @@ class _HomePageState extends State<HomePage> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.58),
+                        color: Colors.white.withValues(alpha: 0.58),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
@@ -457,7 +455,7 @@ class _HomePageState extends State<HomePage> {
             width: 82,
             height: 82,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.55),
+              color: Colors.white.withValues(alpha: 0.55),
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -494,7 +492,7 @@ class _HomePageState extends State<HomePage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.045),
+            color: darkGreen.withValues(alpha: 0.045),
             blurRadius: 18,
             offset: const Offset(0, 7),
           ),
@@ -566,8 +564,8 @@ class _HomePageState extends State<HomePage> {
       borderRadius: BorderRadius.circular(24),
       child: InkWell(
         borderRadius: BorderRadius.circular(24),
-        splashColor: darkGreen.withOpacity(0.08),
-        highlightColor: Colors.white.withOpacity(0.16),
+        splashColor: darkGreen.withValues(alpha: 0.08),
+        highlightColor: Colors.white.withValues(alpha: 0.16),
         onTap: () async {
           await Navigator.push(
             context,
@@ -605,7 +603,7 @@ class _HomePageState extends State<HomePage> {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.42),
+                      color: Colors.white.withValues(alpha: 0.42),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -667,7 +665,7 @@ class _HomePageState extends State<HomePage> {
         ),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.035),
+            color: darkGreen.withValues(alpha: 0.035),
             blurRadius: 14,
             offset: const Offset(0, 5),
           ),
@@ -723,7 +721,7 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.14),
+            color: darkGreen.withValues(alpha: 0.14),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -735,7 +733,7 @@ class _HomePageState extends State<HomePage> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: primary.withOpacity(0.28),
+              color: primary.withValues(alpha: 0.28),
               shape: BoxShape.circle,
             ),
             child: const Icon(

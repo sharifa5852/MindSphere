@@ -21,3 +21,6 @@ __pycache__/
 *.pyc
 .env
 *.log
+
+# Local tunnel binaries, process state, and generated API addresses
+.local/

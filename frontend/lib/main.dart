@@ -4,14 +4,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'pages/auth_gate.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-    print('Firebase initialized successfully');
+  debugPrint('Firebase initialized successfully');
 
   runApp(const MindSphereApp());
 }
@@ -32,7 +31,7 @@ class MindSphereApp extends StatelessWidget {
         ),
         fontFamily: 'Roboto',
       ),
-     home: const AuthGate(),
+      home: const AuthGate(),
     );
   }
 }

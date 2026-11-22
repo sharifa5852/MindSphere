@@ -5,6 +5,7 @@ const Assessment = require("../models/Assessment");
 const escapeRegExp = (text) =>
   text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+// Filter and list active therapist profiles using the supplied query options.
 const getTherapists = async (req, res) => {
   try {
     const { specialization, location, availability, language } = req.query;
@@ -56,6 +57,7 @@ const getTherapists = async (req, res) => {
   }
 };
 
+// Return one active therapist after validating the requested MongoDB ID.
 const getTherapistById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -93,6 +95,7 @@ const getTherapistById = async (req, res) => {
   }
 };
 
+// Rank available therapist profiles with rule-based user-preference matching.
 const getRecommendedTherapists = async (req, res) => {
   try {
     const { location, language, focus } = req.query;

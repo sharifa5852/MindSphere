@@ -18,11 +18,6 @@ class _AssessmentListPageState extends State<AssessmentListPage> {
   static const Color primary = Color(0xFFBFE3C0);
   static const Color paleMint = Color(0xFFD9F0DC);
   static const Color freshMint = Color(0xFFC9EACB);
-  static const Color calmMint = Color(0xFFB5DFC0);
-  static const Color sageMint = Color(0xFFAED8B8);
-  static const Color eucalyptus = Color(0xFFA8D5B5);
-  static const Color dustyMint = Color(0xFFA5D0B2);
-  static const Color celadon = Color(0xFFB7DCC1);
   static const Color morningMint = Color(0xFFC8E7D0);
 
   static const Color background = Color(0xFFF3FAF5);
@@ -228,7 +223,7 @@ class _AssessmentListPageState extends State<AssessmentListPage> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.07),
+            color: darkGreen.withValues(alpha: 0.07),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -243,7 +238,7 @@ class _AssessmentListPageState extends State<AssessmentListPage> {
               width: 115,
               height: 115,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 shape: BoxShape.circle,
               ),
             ),
@@ -255,7 +250,7 @@ class _AssessmentListPageState extends State<AssessmentListPage> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.10),
+                color: Colors.white.withValues(alpha: 0.10),
                 shape: BoxShape.circle,
               ),
             ),
@@ -267,7 +262,7 @@ class _AssessmentListPageState extends State<AssessmentListPage> {
                 width: 58,
                 height: 58,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.68),
+                  color: Colors.white.withValues(alpha: 0.68),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -510,7 +505,7 @@ class _AssessmentListPageState extends State<AssessmentListPage> {
         border: Border.all(color: softBorder),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.035),
+            color: darkGreen.withValues(alpha: 0.035),
             blurRadius: 12,
             offset: const Offset(0, 5),
           ),
@@ -639,7 +634,7 @@ class _AssessmentCard extends StatelessWidget {
         border: Border.all(color: softBorder),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.055),
+            color: darkGreen.withValues(alpha: 0.055),
             blurRadius: 18,
             offset: const Offset(0, 7),
           ),

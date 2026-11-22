@@ -13,6 +13,7 @@ const assessmentTypes = {
   },
 };
 
+// Convert a PHQ-9 or GAD-7 total into its configured severity band.
 const getResultLevel = (type, score) => {
   if (type === "phq9") {
     if (score <= 4) return "minimal";
@@ -32,6 +33,7 @@ const getResultLevel = (type, score) => {
   return null;
 };
 
+// Sum validated answers and derive the screening level and support flags.
 const calculateAssessmentResult = (type, answers) => {
   const score = answers.reduce((total, answer) => total + answer, 0);
   const level = getResultLevel(type, score);

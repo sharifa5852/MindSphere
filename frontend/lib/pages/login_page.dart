@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'email_verification_page.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -79,25 +81,23 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       debugPrint('Firebase login successful');
-      debugPrint('Firebase UID: ${user.uid}');
-
-      if (!mounted) return;
-
-      await ApiService.syncUser(
-        name: user.displayName ?? 'MindSphere User',
-      );
-
-//new change
-      debugPrint('User synchronized with backend.');
-
-      final isVerified = await _authService.reloadAndCheckVerified();
+      // Firebase sign-in has succeeded. A backend outage must not turn that
+      // into an authentication failure; the profile page also retries sync.
+      unawaited(ApiService.ensureProfile().then<void>(
+        (_) => debugPrint('User synchronized with backend.'),
+        onError: (Object error) => debugPrint(
+          'Profile sync pending: ${ApiService.readableError(error)}',
+        ),
+      ));
+      final isVerified = user.emailVerified;
 
       if (!mounted) return;
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => isVerified ? const AppShell() : const EmailVerificationPage(),
+          builder: (_) =>
+              isVerified ? const AppShell() : const EmailVerificationPage(),
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -123,7 +123,8 @@ class _LoginPageState extends State<LoginPage> {
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      labelStyle: const TextStyle(color: mutedOnLight, fontWeight: FontWeight.w600),
+      labelStyle:
+          const TextStyle(color: mutedOnLight, fontWeight: FontWeight.w600),
       hintStyle: const TextStyle(color: mutedOnLight),
       prefixIcon: Icon(icon, color: greenDark, size: 21),
       suffixIcon: suffixIcon,
@@ -158,7 +159,8 @@ class _LoginPageState extends State<LoginPage> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
             child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(24, isCompactHeight ? 12 : 20, 24, 28),
+              padding:
+                  EdgeInsets.fromLTRB(24, isCompactHeight ? 12 : 20, 24, 28),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -178,14 +180,15 @@ class _LoginPageState extends State<LoginPage> {
                         borderRadius: BorderRadius.circular(22),
                         boxShadow: [
                           BoxShadow(
-                            color: mintPrimary.withOpacity(0.55),
+                            color: mintPrimary.withValues(alpha: 0.55),
                             blurRadius: 26,
                             offset: const Offset(0, 12),
                           ),
                         ],
                       ),
                       child: Center(
-                        child: Text('🌿', style: TextStyle(fontSize: 34 * scale)),
+                        child:
+                            Text('🌿', style: TextStyle(fontSize: 34 * scale)),
                       ),
                     ),
                   ),
@@ -242,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
                       borderRadius: BorderRadius.circular(26),
                       boxShadow: [
                         BoxShadow(
-                          color: forestText.withOpacity(0.06),
+                          color: forestText.withValues(alpha: 0.06),
                           blurRadius: 30,
                           offset: const Offset(0, 14),
                         ),
@@ -292,7 +295,8 @@ class _LoginPageState extends State<LoginPage> {
                           child: TextButton(
                             onPressed: () {},
                             style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                             ),
@@ -321,7 +325,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: greenDark.withOpacity(0.35),
+                                  color: greenDark.withValues(alpha: 0.35),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),
@@ -344,7 +348,9 @@ class _LoginPageState extends State<LoginPage> {
                                       height: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.4,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.white),
                                       ),
                                     )
                                   : Text(
@@ -368,7 +374,8 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Text(
                         "Don't have an account? ",
-                        style: TextStyle(color: mutedOnLight, fontSize: 13 * scale),
+                        style: TextStyle(
+                            color: mutedOnLight, fontSize: 13 * scale),
                       ),
                       TextButton(
                         style: TextButton.styleFrom(
@@ -379,7 +386,8 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const SignupPage()),
+                            MaterialPageRoute(
+                                builder: (_) => const SignupPage()),
                           );
                         },
                         child: Text(

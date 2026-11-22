@@ -228,6 +228,7 @@ const Assessment = require("../models/Assessment");
 const roundValue = (value) =>
   typeof value === "number" ? Number(value.toFixed(2)) : null;
 
+// Aggregate mood, journal, and assessment records for one user and date range.
 const buildReport = async (userId, startDate, endDate, periodName) => {
   const dateFilter = {
     userId,
@@ -379,6 +380,7 @@ const buildReport = async (userId, startDate, endDate, periodName) => {
   };
 };
 
+// Build and return the authenticated user's report for the recent week.
 const getWeeklyReport = async (req, res) => {
   try {
     const endDate = new Date();
@@ -408,6 +410,7 @@ const getWeeklyReport = async (req, res) => {
   }
 };
 
+// Build and return the authenticated user's report for the current month.
 const getMonthlyReport = async (req, res) => {
   try {
     const endDate = new Date();

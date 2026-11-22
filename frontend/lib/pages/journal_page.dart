@@ -18,11 +18,6 @@ class _JournalPageState extends State<JournalPage> {
   static const Color primary = Color(0xFFBFE3C0);
   static const Color paleMint = Color(0xFFD9F0DC);
   static const Color freshMint = Color(0xFFC9EACB);
-  static const Color calmMint = Color(0xFFB5DFC0);
-  static const Color sageMint = Color(0xFFAED8B8);
-  static const Color eucalyptus = Color(0xFFA8D5B5);
-  static const Color dustyMint = Color(0xFFA5D0B2);
-  static const Color celadon = Color(0xFFB7DCC1);
   static const Color morningMint = Color(0xFFC8E7D0);
 
   static const Color background = Color(0xFFF3FAF5);
@@ -399,7 +394,7 @@ class _JournalPageState extends State<JournalPage> {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.07),
+            color: darkGreen.withValues(alpha: 0.07),
             blurRadius: 24,
             offset: const Offset(0, 9),
           ),
@@ -414,7 +409,7 @@ class _JournalPageState extends State<JournalPage> {
               width: 125,
               height: 125,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.17),
+                color: Colors.white.withValues(alpha: 0.17),
                 shape: BoxShape.circle,
               ),
             ),
@@ -427,7 +422,7 @@ class _JournalPageState extends State<JournalPage> {
               width: 82,
               height: 82,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
               ),
             ),
@@ -443,7 +438,7 @@ class _JournalPageState extends State<JournalPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.58),
+                  color: Colors.white.withValues(alpha: 0.58),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text(
@@ -483,15 +478,15 @@ class _JournalPageState extends State<JournalPage> {
 
               const SizedBox(height: 17),
 
-              Row(
+              const Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.auto_awesome_rounded,
                     size: 15,
                     color: darkGreen,
                   ),
-                  const SizedBox(width: 6),
-                  const Text(
+                  SizedBox(width: 6),
+                  Text(
                     'Reflect • release • notice',
                     style: TextStyle(
                       fontSize: 10,
@@ -557,7 +552,7 @@ Widget _journalEditor() {
       ),
       boxShadow: [
         BoxShadow(
-          color: darkGreen.withOpacity(0.045),
+          color: darkGreen.withValues(alpha: 0.045),
           blurRadius: 20,
           offset: const Offset(0, 7),
         ),
@@ -772,7 +767,7 @@ Widget _journalEditor() {
             if (selected)
               BoxShadow(
                 color:
-                    darkGreen.withOpacity(0.06),
+                    darkGreen.withValues(alpha: 0.06),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -787,7 +782,7 @@ Widget _journalEditor() {
               height: 43,
               decoration: BoxDecoration(
                 color: selected
-                    ? Colors.white.withOpacity(0.60)
+                    ? Colors.white.withValues(alpha: 0.60)
                     : paleMint,
                 borderRadius:
                     BorderRadius.circular(14),
@@ -835,7 +830,7 @@ Widget _journalEditor() {
                   : Icons.radio_button_unchecked_rounded,
               color: selected
                   ? darkGreen
-                  : mutedText.withOpacity(0.25),
+                  : mutedText.withValues(alpha: 0.25),
               size: 22,
             ),
           ],
@@ -858,7 +853,7 @@ Widget _journalEditor() {
         style: ElevatedButton.styleFrom(
           backgroundColor: darkGreen,
           disabledBackgroundColor:
-              darkGreen.withOpacity(0.55),
+              darkGreen.withValues(alpha: 0.55),
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -955,7 +950,6 @@ class _AnalysisCard extends StatelessWidget {
   static const Color forestText = Color(0xFF1B4332);
   static const Color mutedText = Color(0xFF5B7568);
   static const Color paleMint = Color(0xFFD9F0DC);
-  static const Color primary = Color(0xFFBFE3C0);
   static const Color freshMint = Color(0xFFC9EACB);
 
   String get _modeLabel {
@@ -995,7 +989,7 @@ class _AnalysisCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(27),
         boxShadow: [
           BoxShadow(
-            color: darkGreen.withOpacity(0.07),
+            color: darkGreen.withValues(alpha: 0.07),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -1011,8 +1005,8 @@ class _AnalysisCard extends StatelessWidget {
                 width: 45,
                 height: 45,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(
-                    0.58,
+                  color: Colors.white.withValues(
+                    alpha: 0.58,
                   ),
                   shape: BoxShape.circle,
                 ),
@@ -1102,8 +1096,8 @@ class _AnalysisCard extends StatelessWidget {
               vertical: 9,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(
-                0.48,
+              color: Colors.white.withValues(
+                alpha: 0.48,
               ),
               borderRadius:
                   BorderRadius.circular(13),
@@ -1178,7 +1172,7 @@ class _JournalEntryCard extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color:
-                  darkGreen.withOpacity(0.035),
+                  darkGreen.withValues(alpha: 0.035),
               blurRadius: 15,
               offset: const Offset(0, 5),
             ),

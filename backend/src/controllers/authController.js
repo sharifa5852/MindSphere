@@ -117,6 +117,7 @@
 
 const User = require("../models/User");
 
+// Create or refresh the MongoDB profile using the verified Firebase identity.
 const syncUser = async (req, res) => {
   try {
     // authMiddleware already verified the Firebase ID token before this
@@ -136,45 +137,38 @@ const syncUser = async (req, res) => {
       });
     }
 
-    // Always look the user up by Firebase UID, never by name or email.
-    let user = await User.findOne({ firebaseUid: uid });
-
-    // -----------------------------
-    // User does not exist yet
-    // -----------------------------
-    if (!user) {
-      user = await User.create({
-        firebaseUid: uid,
-        name: name || "MindSphere User",
-        email: email,
-      });
-
-      return res.status(201).json({
-        success: true,
-        message: "User created successfully.",
-        user: {
-          id: user._id,
-          firebaseUid: user.firebaseUid,
-          name: user.name,
-          email: user.email,
-        },
+    if (name !== undefined &&
+        (typeof name !== "string" || !name.trim() || name.trim().length > 100)) {
+      return res.status(400).json({
+        success: false,
+        message: "Name must be non-empty text of at most 100 characters.",
       });
     }
 
-    // -----------------------------
-    // User already exists — keep it in sync
-    // -----------------------------
-    if (name && name.trim() !== "") {
-      user.name = name.trim();
+    const update = {
+      $set: { email },
+      $setOnInsert: { firebaseUid: uid },
+    };
+    if (name !== undefined) {
+      update.$set.name = name.trim();
+    } else {
+      // A restored Firebase session may not have a display name. Preserve an
+      // existing MongoDB name rather than replacing it with a placeholder.
+      update.$setOnInsert.name = firebaseUser.name?.trim() || "MindSphere User";
     }
+    const result = await User.findOneAndUpdate({ firebaseUid: uid }, update, {
+      upsert: true,
+      new: true,
+      runValidators: true,
+      setDefaultsOnInsert: true,
+      includeResultMetadata: true,
+    });
+    const user = result.value;
+    const created = result.lastErrorObject?.updatedExisting === false;
 
-    user.email = email;
-
-    await user.save();
-
-    return res.status(200).json({
+    return res.status(created ? 201 : 200).json({
       success: true,
-      message: "User synchronized successfully.",
+      message: created ? "User created successfully." : "User synchronized successfully.",
       user: {
         id: user._id,
         firebaseUid: user.firebaseUid,
@@ -192,6 +186,7 @@ const syncUser = async (req, res) => {
   }
 };
 
+// Return the authenticated user's profile and preferences.
 const getCurrentUser = async (req, res) => {
   try {
     // authMiddleware already verified the Firebase ID token.
@@ -227,6 +222,7 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
+// Validate and save profile or preference changes for the authenticated user.
 const updateProfile = async (req, res) => {
   try {
     // authMiddleware already verified the Firebase ID token.
